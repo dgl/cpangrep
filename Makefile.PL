@@ -10,7 +10,7 @@ my %opts = (
     'Moose' => 0,
     'File::Slurp' => 0,
     'AnyEvent::Redis' => 0,
-    'Tie::Redis' => '0.22_01',
+    'Tie::Redis' => '0.22_1',
     'Web::Simple' => 0,
     're::engine::RE2' => 0,
   }

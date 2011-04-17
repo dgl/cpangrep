@@ -96,7 +96,6 @@ sub search(GET + / + ?q=&page~) {
       use Data::Dump qw(pp dump);
       print "Got $count results...\n" if 0 == $count % 200;
       return if not $text;
-      print "Response was '$text'\n";
       my $j = decode_json($text);
 
       if($count > MAX) {

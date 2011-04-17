@@ -1,6 +1,7 @@
 # -*- mode: org -*-
 
 * Consistent use of config
+* Stop using Tie::Redis in such a stupid/insane way
 * Tests
 ** Make unit testable
 ** Using fakecpan for end to end type tests
