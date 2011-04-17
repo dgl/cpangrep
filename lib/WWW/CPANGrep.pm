@@ -56,9 +56,9 @@ sub search(GET + / + ?q=&page~) {
   if(!$re->isa("re::engine::RE2")) {
     # XXX: friendlier errors?
     return [ 200, ['Content-type' => 'text/html'],
-      [ "Please don't use lookbehind or anything else RE2 doesn't understand, grazie! <!-- " . (ref $re) . " $re -->" ] ];
+      [ "Please don't use lookbehind or anything else RE2 doesn't understand!" ] ];
 
-  } elsif("abcdefgh" x 20 =~ /^$re$/) {
+  } elsif("abcdefgh" x 20 =~ /$re/) {
     # RE2 is quite happy with most things you throw at it, but really doesn't
     # like lots of long matches, this is just a lame check.
     return [ 200, ['Content-type' => 'text/html'],
@@ -67,9 +67,8 @@ sub search(GET + / + ?q=&page~) {
 
   my $start = AE::time;
 
-  my $SLAB = "stest";
-
-  my $len = $redis->llen($SLAB)->recv;
+  my $slab = $config->{"key.slabs"};
+  my $len = $redis->llen($slab)->recv;
   my $req = 6;
   my $c = int $len/$req;
   my $notify = "webfe1." . $$ . "." . ++$counter;
@@ -77,7 +76,7 @@ sub search(GET + / + ?q=&page~) {
     my @slabs = ($c*($_-1), $_ eq $req ? $len : ($c*$_)-1);
     $req = $_, last unless @slabs;
     $redis->rpush("queue:cpangrep:slabsearch", encode_json({
-        slablist => $SLAB,
+        slablist => $slab,
         slabs => \@slabs,
         re => $q,
         notify => $notify
