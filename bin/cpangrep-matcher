@@ -104,7 +104,6 @@ while(1) {
     my $end = time;
     print "$$: job done (", $end-$start, "s)\n";
   }
-  my $timer = AE::timer 2, 0, sub { print "died\n" };
   $redis->ping->recv;
 }
 
