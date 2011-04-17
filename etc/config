@@ -6,3 +6,6 @@
   Slab = localhost
   Queue = localhost
 
+[Key]
+  Slabs = cpangrep:slabs
+

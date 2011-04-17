@@ -41,6 +41,8 @@ sub index {
   $self->redis->{$queue} = \@queue;
   print "Inserted ", scalar(@{$self->redis->{$queue}}), " dists into $queue\n";
 
+  delete $self->redis->{"new-index"};
+
   WWW::CPANGrep::Index::Worker->new(
     cpan_dir => $self->cpan_dir,
     slab_dir => $self->slab_dir,

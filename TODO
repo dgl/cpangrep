@@ -1,14 +1,12 @@
 # -*- mode: org -*-
 
-* Make 'stest' go away and generate the list of slabs
-** Update pointer to slabs atomically
-   So we can build a new index and do a simple rename in redis to activate it
 * Consistent use of config
 * Stop using Tie::Redis in such a stupid/insane way
 * Use Redis::Queue (or similar)?
 * Tests
 ** Make unit testable
 ** Using fakecpan for end to end type tests
+* Caching (at least for basic paging to avoid searches all the time)
 * Complex search
 ** dist:...
 ** author:..?

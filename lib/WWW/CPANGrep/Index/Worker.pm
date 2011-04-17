@@ -70,6 +70,11 @@ sub run {
 
   my $name = $self->_slab->finish;
   push @{$self->redis->{"new-index"}}, @{$self->redis->{$name}};
+
+  if(!@{$self->redis->{$queue}}) {
+    # XXX: This should be read from the config
+    (tied %{$self->redis})->rename("new-index", "cpangrep:slabs");
+  }
 }
 
 sub index_dist {
