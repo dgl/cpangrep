@@ -17,7 +17,7 @@ There's also a version that wraps this in L<Plack::Debug> in F<debug.psgi>.
 
 =item * cpangrep-matcher
 
-Backend workers that do the matching, based on a redis queue that
+Backend workers that do the matching, based on a redis queue.
 
 =item * Redis
 

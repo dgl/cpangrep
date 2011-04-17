@@ -1,1 +1,9 @@
+META.yml
+MYMETA.yml
+MANIFEST*
 Makefile
+Makefile.old
+.*.sw[op]
+blib
+pm_to_blib
+*.tar.gz
