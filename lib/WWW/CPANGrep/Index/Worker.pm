@@ -68,7 +68,8 @@ sub run {
     );
   }
 
-  $self->_slab->finish;
+  my $name = $self->_slab->finish;
+  push @{$self->redis->{"new-index"}}, @{$self->redis->{$name}};
 }
 
 sub index_dist {
