@@ -72,8 +72,10 @@ sub run {
   push @{$self->redis->{"new-index"}}, @{$self->redis->{$name}};
 
   if(!@{$self->redis->{$queue}}) {
+    my $redis = tied %{$self->redis};
     # XXX: This should be read from the config
-    (tied %{$self->redis})->rename("new-index", "cpangrep:slabs");
+    $redis->rename("new-index", "cpangrep:slabs")->recv;
+    $redis->save->recv;
   }
 }
 
