@@ -13,6 +13,9 @@ my %opts = (
     'Tie::Redis' => '0.22_1',
     'Web::Simple' => 0,
     're::engine::RE2' => 0,
+    'Data::Pageset::Render' => 0,
+    'HTML::Zoom' => 0,
+    'Config::GitLike' => 0,
   }
 );
 
