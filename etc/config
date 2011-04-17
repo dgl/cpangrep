@@ -1,0 +1,8 @@
+[Location]
+  CPAN  = /Users/dgl/cpangrep/fakecpan
+  Slabs = /Users/dgl/cpangrep/extract
+
+[Server]
+  Slab = localhost
+  Queue = localhost
+

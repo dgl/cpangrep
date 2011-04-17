@@ -1,0 +1,16 @@
+Abstract when hovering over a dist name
+
+Cleanup about page
+
+Line numbering
+
+File displaying / syntax hilighting
+
+De-dupe
+- Matches in same file
+- File level (MD5?)
+- Too many matches in distro (more...)
+
+dist:...
+author:..?
+

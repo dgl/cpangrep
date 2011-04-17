@@ -1,0 +1,168 @@
+body
+{
+	font-family: helvetica, arial, sans, sans-serif;
+	font-size: 1em;
+	line-height: 2em;
+}
+
+img
+{
+	border: 0;
+}
+
+.q, .btn
+{
+	font-size: 1.2em;
+}
+
+.q
+{
+	background: #fafafa;
+	border-left: 1px solid #000;
+	border-top: 1px solid #000;
+	border-right: 1px solid #aaa;
+	border-bottom: 1px solid #aaa;
+}
+
+
+.search
+{
+	text-align: center;
+	margin-top: 8em;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.search form
+{
+	margin-top: 1.5em;
+	font-size: 0.8em;
+	color: #888;
+}
+
+.search form a
+{
+	color: #88f;
+}
+
+.alpha
+{
+	margin: 3em 0;
+	color: #888;
+}
+
+.footer
+{
+	font-size: 0.8em;
+}
+
+.header
+{
+	padding-top: 0.25em;
+	padding-left: 5em;
+}
+
+.magnify
+{
+	position: absolute;
+	left: 0.5em;
+	top: 0.5em;
+}
+
+.divider, .divfooter
+{
+	width: 100%;
+	min-width: 5em;
+	border-top: 1px solid #46a;
+}
+
+.divider
+{
+	background: #e8f0ff;
+	background-image: url('fadein.png');
+	background-repeat: repeat-y;
+	border-bottom: 1px solid #cdf;
+	padding: 0.2em;
+	text-align: right;
+	font-size: 0.8em;
+	line-height: 1.2em;
+}
+
+.divfooter
+{
+	margin-top: 1.5em;
+	text-align: center;
+	padding-top: 0.5em;
+	font-size: 0.8em;
+}
+
+.results
+{
+	width: 98%;
+	min-width: 5em;
+	line-height: 1em;
+}
+
+.result
+{
+	margin-top: 0.8em;
+	border: 1px dotted #888;
+	padding: 0.5em;
+}
+
+.file-link, .file-link:visited, .file-link:active
+{
+	font-family: times, serif;
+	font-size: 1.05em;
+	color: #00c;
+	margin: 0;
+}
+
+.excerpt
+{
+	background: #f2f2f2;
+	font-family: monospace;
+	font-size: 1em;
+	color: #444;
+	border-left: 1px solid #aaa;
+	padding: 0.2em 0.5em;
+	margin: 0.5em 1em;
+}
+
+.dist-link, .dist-link:visited, .dist-link:active
+{
+	font-size: 0.9em;
+	color: #060;
+}
+
+.pagination
+{
+	margin: 1.5em;
+	font-size: 1em;
+	text-align: center;
+}
+
+.pagination a
+{
+  padding-right: .3em;
+}
+
+.page
+{
+	margin: 2em;
+	line-height: 1.2em;
+	font-size: 0.9em;
+	max-width: 40em;
+}
+
+.pageheader
+{
+	width: 100%;
+	padding-bottom: 0.5em;
+	border-bottom: 1px solid #888;
+}
+
+p
+{
+	margin: 0 0 0.8em 0;
+}

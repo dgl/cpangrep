@@ -1,0 +1,7 @@
+#!/usr/bin/perl
+use strict;
+use WWW::CPANGrep::Index;
+
+my $app = WWW::CPANGrep::Index->new_with_options;
+$app->index;
+

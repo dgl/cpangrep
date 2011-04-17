@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head profile="http://gmpg.org/xfn/1">
+	<title>About CPAN-&gt;grep</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta http-equiv="imagetoolbar" content="no" />
+	<meta name="description" content="Search code on CPAN using regular expressions." />
+	<meta name="keywords" content="cpan,search,regex,regexp,regular,expressions,reg,exp,ex,re,find,through,within,inside,in" />
+	<meta name="robots" content="all" />
+	<link rel="icon" type="image/png" href="/favicon.png" />
+	<link rel="stylesheet" type="text/css" media="screen, projection" href="//dg.cx/cpangrep/cpangrep.css" />
+</head>
+
+<body>
+
+	<div class="page">
+
+		<div class="pageheader">
+			<a href="/"><img src="//dg.cx/cpangrep/logo2.png" alt="CPAN-&gt;grep" /></a>
+		</div>
+
+		<h2>Description</h2>
+		<p>Akin to Google's Code Search, this aims to search all the code found on CPAN. It concenrates on searching code; if you just want to look for a module use search.cpan.org instead.</p>
+		<p>Regular Expressions are supported via re::engine::RE2 (which wraps RE2 that originated from Google's Code Search). This means that the regexps supported are mostly Perl compatible but are not totally compatible with Perl. Of particular note is look-ahead and look-behind are not supported. A future version may implement more advanced syntax so it is not just limited to regexps, and can filter out matches by NOT, but this isn't yet supported.</p>
+		<p>(Due to performance concerns re::engine::RE2's ability to fallback to Perl regexps is disabled.)</p>
+
+		<h2>Architecture</h2>
+		<p>As with most search engines there is an index builder and the search frontend which actually searches the index.</p>
+		<p>The index is stored in Redis.</p>
+		<p>The latest version of each distribution indexed on CPAN is loaded into this index.</p>
+		<p>XXX: Expand.</p>
+
+		<h2>Misc</h2>
+		<p>For help ask me (dg) on irc.perl.org, #toolchain or mail dgl at dgl.cx.</p>
+		<p>Contributions are welcome, you can find the git repository at XXX: not yet! https://github.com/dgl/cpangrep</p>
+
+	</div>
+
+	
+<div class="divfooter">
+<a href="/">Home</a> &middot; <a href="/about">About</a> &middot; <a href="/statistics">Stats</a>
+</div>
+
+
+
+
+</body>
+
+</html>

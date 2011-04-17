@@ -1,0 +1,110 @@
+#!perl
+use strict;
+use 5.012;
+use EV;
+use AnyEvent::Redis;
+use IO::AIO qw(mmap aio_readahead);
+use re::engine::RE2;
+use JSON;
+use Config::GitLike;
+
+my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config");
+my $dir = $config->{"location.slabs"};
+
+my $c = 16;
+
+for(1 .. $c) {
+  my $pid = fork;
+  if($pid) {
+    if($_ == $c) { exit }
+    next;
+  } else {
+    last;
+  }
+}
+
+my $redis = AnyEvent::Redis->new;
+
+sub open_cached {
+  my($file) = @_;
+  state %cache;
+
+  open $cache{$file}, "<", $file or die "$file: $!" unless $cache{$file};
+  return $cache{$file};
+}
+
+sub do_match {
+  my($re, $max, $channel, $process) = @_;
+
+  my $matches = 0;
+
+  $re = qr/$re/m;
+
+  my $i = 0;
+  my $fh_next = open_cached($dir . "/" . $process->[$i++]->{file});
+
+  for my $file(@$process) {
+    my $fh = $fh_next;
+    mmap my $pm, -s $fh, IO::AIO::PROT_READ, IO::AIO::MAP_SHARED, $fh or die $!;
+
+    if(my $next = $process->[$i++]) {
+      $fh_next = open_cached($dir . "/" . $next->{file});
+      aio_readahead $fh_next, 0, -s $next;
+    }
+
+    my @results;
+    while($pm =~ /$re/g) {
+      if($+[0] - $-[0] > 1e5) {
+	 $redis->publish($channel => encode_json {
+	     error => "Regexp is too greedy"
+         });
+         return;
+      } 
+
+      # XXX: A bit broken in edge cases.
+      # Be careful not to use regexps!
+      my $previous = rindex($pm, "\n", $-[0]);
+      $previous = 1+rindex($pm, "\n", $previous-1) if $previous > 0;
+      my $next = index($pm, "\n", $+[0]);
+      $next = index($pm, "\n", 1+$next) if $next > 0;
+
+      # Limit length of snippet, 200 bytes should be enough for anyone
+      if($next > $previous + 200) {
+	$previous = $previous < $-[0] - 100 ? $-[0] - 100 : $previous;
+	$next = $next > $+[0] + 100 ? $+[0] + 100 : $next;
+      }
+      
+      push @results, {
+	zset    => $file->{zset},
+	text    => substr($pm, $previous, $next - $previous),
+	snippet => [$previous, $next],
+	match   => [$-[0], $+[0]]
+      };
+    }
+
+    $redis->publish($channel => encode_json \@results);
+
+    return if ++$matches > $max;
+  }
+}
+use Time::HiRes qw(time);
+print "$$: ready\n";
+while(1) {
+  while(my $item = $redis->blpop("queue:cpangrep:slabsearch", 60)->recv) {
+    last unless $item->[0];
+    print "$$: processing job: $item->[1]\n";
+    my $job = decode_json $item->[1];
+    my $slabs = [map decode_json($_), @{$redis->lrange($job->{slablist}, @{$job->{slabs}})->recv}];
+    my $max = $job->{max} || 3_000;
+    my $start = time;
+    do_match($job->{re}, $max, $job->{notify}, $slabs);
+    $redis->publish($job->{notify} => encode_json {
+	done => 1,
+	id => $job->{id}});
+    my $end = time;
+    print "$$: job done (", $end-$start, "s)\n";
+  }
+  my $timer = AE::timer 2, 0, sub { print "died\n" };
+  $redis->ping->recv;
+}
+
