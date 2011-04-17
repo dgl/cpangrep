@@ -1,6 +1,9 @@
 # -*- mode: org -*-
 
 * Consistent use of config
+* Tests
+** Make unit testable
+** Using fakecpan for end to end type tests
 * Complex search
 ** dist:...
 ** author:..?
