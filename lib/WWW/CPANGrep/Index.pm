@@ -31,19 +31,15 @@ has jobs => (
 sub index {
   my($self) = @_;
 
-  print "start\n";
-
   my $packages = Parse::CPAN::Packages->new($self->cpan_dir
     . "/modules/02packages.details.txt.gz");
 
   my $queue = "distlist:queue:" . time;
   my @queue = map $_->cpanid . "/" . $_->filename,
         $packages->latest_distributions;
-  print scalar @queue, "\n";
 
   $self->redis->{$queue} = \@queue;
-  print "Insert into $queue\n";
-  print scalar @{$self->redis->{$queue}}, "\n";
+  print "Inserted ", scalar(@{$self->redis->{$queue}}), " dists into $queue\n";
 
   WWW::CPANGrep::Index::Worker->new(
     cpan_dir => $self->cpan_dir,
