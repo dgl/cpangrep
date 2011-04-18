@@ -9,6 +9,8 @@
 * Caching (at least for basic paging to avoid searches all the time)
 * Complex search
 ** dist:...
+   searching a specific dist
+   searching all dists matching something
 ** author:..?
 * Cleanup about page
 * Line numbering

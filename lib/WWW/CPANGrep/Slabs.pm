@@ -48,6 +48,9 @@ sub index {
 sub finish {
   my($self) = @_;
 
+  # Tie::Redis won't autovivify yet :(
+  $self->redis->{$self->name} ||= [];
+
   push @{$self->redis->{$self->name}}, encode_json {
     file => $self->_slab->file_name,
     zset => $self->_slab->zset_name

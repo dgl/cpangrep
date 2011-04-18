@@ -69,6 +69,9 @@ sub run {
   }
 
   my $name = $self->_slab->finish;
+
+  # Tie::Redis currently won't autovivify :(
+  $self->redis->{"new-index"} ||= [];
   push @{$self->redis->{"new-index"}}, @{$self->redis->{$name}};
 
   if(!@{$self->redis->{$queue}}) {
