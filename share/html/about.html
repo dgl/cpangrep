@@ -10,6 +10,19 @@
 	<meta name="robots" content="all" />
 	<link rel="icon" type="image/png" href="/favicon.png" />
 	<link rel="stylesheet" type="text/css" media="screen, projection" href="//dg.cx/cpangrep/cpangrep.css" />
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-21173598-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </head>
 
 <body>
@@ -22,28 +35,31 @@
 
 		<h2>Description</h2>
 		<p>Akin to Google's Code Search, this aims to search all the code found on CPAN. It concenrates on searching code; if you just want to look for a module use search.cpan.org instead.</p>
-		<p>Regular Expressions are supported via re::engine::RE2 (which wraps RE2 that originated from Google's Code Search). This means that the regexps supported are mostly Perl compatible but are not totally compatible with Perl. Of particular note is look-ahead and look-behind are not supported. A future version may implement more advanced syntax so it is not just limited to regexps, and can filter out matches by NOT, but this isn't yet supported.</p>
+		<p><a name="re" />Regular Expressions are supported via re::engine::RE2 (which wraps RE2 that originated from Google's Code Search). This means that the regexps supported are mostly Perl compatible but are not totally compatible with Perl. Of particular note is look-ahead and look-behind are not supported, for more details see <a href="http://code.google.com/p/re2/wiki/Syntax">RE2's supported syntax</a>. A future version may implement more advanced syntax so it is not just limited to regexps, and can filter out matches by NOT, but this isn't yet supported.</p>
 		<p>(Due to performance concerns re::engine::RE2's ability to fallback to Perl regexps is disabled.)</p>
 
-		<h2>Architecture</h2>
-		<p>As with most search engines there is an index builder and the search frontend which actually searches the index.</p>
-		<p>The index is stored in Redis.</p>
-		<p>The latest version of each distribution indexed on CPAN is loaded into this index.</p>
-		<p>XXX: Expand.</p>
+		<h2>Examples</h2>
+		A picture is worth a thousand words, an example more. <small>&ndash; I just made that up.</small>
+		<p>
+		<ul>
+		<li><a href="/?q=easter%20egg">Where are the easter eggs hidden?</a></li>
+		<li><a href="/?q=GvCV%5Cs*%5C%28%5B%5E%29%5D%2B%5C%29%5Cs*%3D%5B%5E%3D%5D">GvCV\s*\([^)]+\)\s*=[^=]</a> &mdash; search for assignments to GvCV</a></li>
+		<li><a href="/?q=(?i:this+should+work,+but)">"this should work, but"...</a></li>
+		<li><a href="/?q=%5E%23.*ACHTUNG">^#.*ACHTUNG</a></li>
+		<li><a href="/?q=%5E%3Dhead1+NAME%5B%5Cr%5Cn+%5D%2B.*Foo">Files with a "NAME" POD section with "Foo" on the first line.</a>
+		</ul>
+		(If you find any more good examples please send them my way.)
 
 		<h2>Misc</h2>
-		<p>For help ask me (dg) on irc.perl.org, #toolchain or mail dgl at dgl.cx.</p>
-		<p>Contributions are welcome, you can find the git repository at XXX: not yet! https://github.com/dgl/cpangrep</p>
+		<p>Written by <a href="https://dgl.cx">David Leadbeater</a>. For help ask me (dg) on irc.perl.org, #toolchain or mail dgl at dgl.cx.</p>
+                <p>Contributions are welcome, you can find the git repository at <a href="https://github.com/dgl/cpangrep">github</a>.</p>
 
+		Thanks to <a href="http://taras.net/">taras</a> for help with graphics and layout.
 	</div>
 
-	
 <div class="divfooter">
-<a href="/">Home</a> &middot; <a href="/about">About</a> &middot; <a href="/statistics">Stats</a>
+<a href="/">Home</a> &middot; <a href="/about">About</a>
 </div>
-
-
-
 
 </body>
 

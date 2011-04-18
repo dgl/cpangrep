@@ -10,11 +10,28 @@
 	<meta name="robots" content="all" />
 	<link rel="icon" type="image/png" href="/favicon.png" />
 	<link rel="stylesheet" type="text/css" media="screen, projection" href="//dg.cx/cpangrep/cpangrep.css" />
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-21173598-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </head>
+
 <body onload="document.forms[0].q.focus();">
 
 	<div class="header">
+
 		<a href="/"><img src="//dg.cx/cpangrep/magnify80.png" alt="CPAN->GREP" class="magnify" /></a>
+	
 		<form action="/" method="get">
 		<p>
 				<input name="q" class="q" size="40" />
@@ -38,12 +55,25 @@
 			<a href="bleh" class="dist-link">MOTIF/Bio-LITE-Taxonomy-NCBI-0.04.tar.gz</a>
 
 		</div>
-	</div>
-        <div class="pagination">
-        </div>
 
-        <div class="divfooter">
-          <a href="/">Home</a> &middot; <a href="/about">About</a> &middot; <a href="/statistics">Stats</a>
-        </div>
-    </body>
+	</div>
+
+
+
+        <div class="pagination">
+          <a href="" id="previous" >&lt;&lt; Previous</a>
+
+	<a href="1">1</a> <a href="1">2</a> <a href="1">3</a> <a href="1">4</a> <a href="1">5</a>  <a href="1" id="next">&gt;&gt;</a>
+</div>
+
+<div class="divfooter">
+<a href="/">Home</a> &middot; <a href="/about">About</a> <!-- &middot; <a href="/statistics">Stats</a> -->
+</div>
+
+
+
+
+
+</body>
+
 </html>
