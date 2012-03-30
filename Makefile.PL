@@ -8,6 +8,7 @@ my %opts = (
     'Parse::CPAN::Packages' => 0,
     'CPAN::Visitor' => 0,
     'Moose' => 0,
+    'MooseX::Getopt' => 0,
     'File::Slurp' => 0,
     'AnyEvent::Redis' => 0,
     'Tie::Redis' => '0.22_1',
@@ -16,6 +17,8 @@ my %opts = (
     'Data::Pageset::Render' => 0,
     'HTML::Zoom' => 0,
     'Config::GitLike' => 0,
+    'EV' => 0,
+    'IO::AIO' => 0,
   }
 );
 
