@@ -12,6 +12,7 @@ use URI::Escape qw(uri_escape_utf8);
 use Data::Pageset::Render;
 use HTML::Zoom;
 use Config::GitLike;
+use Scalar::Util qw(blessed);
 require re::engine::RE2;
 
 use constant TMPL_PATH => "share/html";
@@ -20,45 +21,44 @@ use constant MAX => 1_000;
 my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config");
 
 sub dispatch_request {
-  \&search,
-  sub (GET + /about) {
-    [ 200,
-    [ "Content-type" => "text/html" ], 
-    [ HTML::Zoom->from_file(TMPL_PATH . "/about.html")->to_html ] ]
-  },
-  sub (GET + /) {
-    print "Get /\n";
-    open my $fh, "<", TMPL_PATH . "/grep.html" or die $!;
-    [ 200,
-    [ 'Content-type' => 'text/html' ],
-    [ join "", <$fh> ]
-    ]
-  },
-  sub (GET + /api + ?q=&limit~&exclude_file~) {
-    my($self, $q, $limit, $exclude_file) = @_;
-    $limit ||= 100;
-    my $r = $self->_search($q, $exclude_file);
+  sub (GET + /api) {
+    sub (?q=&limit~&exclude_file~) {
+      my($self, $q, $limit, $exclude_file) = @_;
+      $limit ||= 100;
+      my $r = $self->_search($q, $exclude_file);
 
-    return [ 200, ['Content-type' => 'application/json' ],
-             [ encode_json({
-                 count => scalar @{$r->{results}},
-                 duration => $r->{duration},
-                 results => [@{$r->{results}}[0 .. $limit]]
-               })]
-           ];
-  }
+      return [ 200, ['Content-type' => 'application/json' ],
+               [ encode_json({
+                   count => scalar @{$r->{results}},
+                   duration => $r->{duration},
+                   results => [@{$r->{results}}[0 .. $limit]]
+                 })]
+             ];
+    }
+  },
+  sub (!/api) {
+    response_filter {
+      $_[0] = [ 200, ['Content-type' => 'text/html'],
+        [ blessed $_[0] && $_[0]->can("to_html") ? $_[0]->to_html : $_[0] ]];
+    }
+  },
+  \&search,
+  sub (/about) {
+    HTML::Zoom->from_file(TMPL_PATH . "/about.html")
+  },
+  sub (/) {
+    HTML::Zoom->from_file(TMPL_PATH . "/grep.html")
+  },
 };
 
-sub search(GET + / + ?q=&page~&exclude_file~) {
+sub search(/ + ?q=&page~&exclude_file~) {
   my($self, $q, $page_number, $exclude_file) = @_;
 
   my $r = $self->_search($q, $exclude_file);
   if(ref $r eq 'HASH') {
-    
-    return [ 200, ['Content-type' => 'text/html'],
-             [ render_response($q, $r->{results}, $r->{duration}, $page_number)->to_html ] ];
+    return render_response($q, $r->{results}, "", $r->{duration}, $page_number);
   } else {
-    return $r;
+    return render_response($q, undef, $r, undef, $page_number);
   }
 }
 
@@ -70,18 +70,15 @@ sub _search {
   my $re = eval { re_compiler($q) };
 
   if(!$q || !$re) {
-    return [ 200, ['Content-type' => 'text/html'], [ "Sorry, I can't make sense of that. $@" ] ];
+    return "Sorry, I can't make sense of that. $@";
   }
   if(!$re->isa("re::engine::RE2")) {
-    # XXX: friendlier errors?
-    return [ 200, ['Content-type' => 'text/html'],
-      [ "Please don't use lookbehind or anything else RE2 doesn't understand!" ] ];
+    return "Please don't use lookbehind or anything else RE2 doesn't understand!";
 
   } elsif("abcdefgh" x 20 =~ $re || $q =~ /^.$/) {
     # RE2 is quite happy with most things you throw at it, but really doesn't
     # like lots of long matches, this is just a lame check.
-    return [ 200, ['Content-type' => 'text/html'],
-      [ "Please don't be that greedy with your matching" ] ];
+    return "Please don't be that greedy with your matching";
   }
 
   my $start = AE::time;
@@ -95,7 +92,7 @@ sub _search {
     my %res = do_search($redis, $q);
     if($res{error}) {
       $response = "Something went wrong! $res{error}";
-      return [ 200, ['Content-type' => 'text/html'], [ $response ] ];
+      return $response;
     } else {
       my $redis_cache = AnyEvent::Redis->new(host => $config->{"server.queue"});
       $redis_cache->setex("querycache:" . uri_escape_utf8($q), 1800, encode_json($res{results}))->recv;
@@ -214,10 +211,10 @@ sub do_search {
 }
 
 sub render_response {
-  my($q, $results, $duration, $page_number) = @_;
+  my($q, $results, $error, $duration, $page_number) = @_;
 
   my $pager = Data::Pageset::Render->new({
-      total_entries    => scalar @$results,
+      total_entries    => $results ? scalar @$results : 0,
       entries_per_page => 25,
       current_page     => $page_number || 1,
       pages_per_set    => 5,
@@ -227,15 +224,15 @@ sub render_response {
 
   my $output = HTML::Zoom->from_file(TMPL_PATH . "/results.html")
     ->select('title')->replace_content("$q · CPAN->grep")
-    ->select('#total')->replace_content(@$results > MAX ? "more than " . MAX : scalar @$results)
-    ->select('#time')->replace_content(sprintf "%0.2f", $duration)
+    ->select('#total')->replace_content(!$results || @$results > MAX ? "more than " . MAX : scalar @$results)
+    ->select('#time')->replace_content(sprintf "%0.2f", $duration || 0)
     ->select('#start-at')->replace_content($pager->first)
     ->select('#end-at')->replace_content($pager->last)
     ->select('input[name="q"]')->add_to_attribute(value => $q);
 
-  if(!@$results) {
+  if($error || !@$results) {
     $output = $output->select('.divider')->replace_content(" ")
-      ->select('.result')->replace_content("No matches found.")
+      ->select('.result')->replace_content($error || "No matches found.")
       ->select('.pagination')->replace("");
   } else {
     $output = $output->select('.results')->repeat_content(
