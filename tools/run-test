@@ -1,0 +1,12 @@
+#!/bin/sh
+# Hacky script for testing purposes
+pkill -f cpangrep-matcher
+pkill -f cpangrep-indexer
+
+if ! pgrep redis-server; then
+  (cd var; redis-server)&
+  sleep .2
+fi
+
+bin/cpangrep-matcher&
+exec starman app.psgi

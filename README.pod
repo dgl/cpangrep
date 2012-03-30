@@ -9,6 +9,28 @@ can do this by C<grep 'D/D./' 02packages.details.txt.gz> and re-adding the
 header. Alternatively the default development configuration will index a sample
 CPAN from L<fakecpan|http://www.fakecpan.org>.
 
+=head2 Quick start
+
+For a very quick development setup you should be able to:
+
+=over 4
+
+=item * Ensure you have Perl 5.10 or later
+
+=item * Install redis
+
+You just need a redis-server binary around, C<run-test> below will start it for you.
+
+=item * Run the following:
+
+  cpanm --installdeps .
+  bin/cpangrep-index
+  tools/run-test
+
+=item * Visit L<http://localhost:5000>
+
+=back
+
 =head2 Components
 
 =over 4
