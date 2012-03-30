@@ -84,7 +84,7 @@ sub run {
   push @{$self->redis->{"new-index"}}, @{$self->redis->{$name}};
 
   if($redis_conn->decr("cpangrep:indexer") == 0) {
-    $redis_conn->rename("cpangrep:slabs", "cpangrep:slabs-old");
+    eval { $redis_conn->rename("cpangrep:slabs", "cpangrep:slabs-old") };
     $redis_conn->rename("new-index", "cpangrep:slabs");
     $redis_conn->save;
 
