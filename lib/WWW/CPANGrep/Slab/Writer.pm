@@ -17,7 +17,7 @@ has dir => (
 
 has redis => (
   is => 'ro',
-  isa => 'AnyEvent::Redis',
+  isa => 'Tie::Redis::Connection',
   required => 1,
 );
 
@@ -51,6 +51,7 @@ has _size => (
 has _fh => (
   is => 'ro',
   isa => 'GlobRef',
+  lazy => 1,
   default => sub {
     my($self) = @_;
     open my $fh, ">", $self->dir . "/" . $self->file_name or die $!;
@@ -63,7 +64,7 @@ sub BUILDARGS {
   my($self, %args) = @_;
 
   # For speed avoid using the tied interface
-  $args{redis} = tied %{$args{redis}};
+  $args{redis} = (tied %{$args{redis}})->{_conn};
 
   return \%args;
 }
@@ -83,7 +84,7 @@ sub index {
       size => length($content),
       dist => $dist,
       file => $file
-  })->recv;
+  });
 
   $self->_size($self->_size + length($content) + length SLAB_SEPERATOR);
 }

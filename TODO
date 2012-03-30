@@ -1,12 +1,13 @@
 # -*- mode: org -*-
 
 * Consistent use of config
+* Caching (at least for basic paging to avoid searches all the time)
+
 * Stop using Tie::Redis in such a stupid/insane way
-* Use Redis::Queue (or similar)?
+* Consider using 0MQ or something other than Redis for queueing
 * Tests
 ** Make unit testable
 ** Using fakecpan for end to end type tests
-* Caching (at least for basic paging to avoid searches all the time)
 * Complex search
 ** dist:...
    searching a specific dist

@@ -1,6 +1,6 @@
 [Location]
-  CPAN  = /Users/dgl/cpangrep/fakecpan
-  Slabs = /Users/dgl/cpangrep/extract
+  CPAN  = fakecpan-sampler-0.001
+  Slabs = var/slabs
 
 [Server]
   Slab = localhost
@@ -9,3 +9,5 @@
 [Key]
   Slabs = cpangrep:slabs
 
+[Matcher]
+  Concurrency = 16

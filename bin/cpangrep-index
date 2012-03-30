@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 use strict;
+use FindBin ();
+use lib "$FindBin::RealBin/../lib";
 use WWW::CPANGrep::Index;
 
 my $app = WWW::CPANGrep::Index->new_with_options;

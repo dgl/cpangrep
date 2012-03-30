@@ -1,6 +1,7 @@
-#!perl
+#!/usr/bin/perl
 use strict;
-use 5.012;
+use 5.010;
+use Time::HiRes qw(time);
 use EV;
 use AnyEvent::Redis;
 use IO::AIO qw(mmap aio_readahead);
@@ -11,7 +12,7 @@ use Config::GitLike;
 my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config");
 my $dir = $config->{"location.slabs"};
 
-my $c = 16;
+my $c = $config->{"matcher.concurrency"} || 8;
 
 for(1 .. $c) {
   my $pid = fork;
@@ -49,7 +50,9 @@ sub do_match {
 
     if(my $next = $process->[$i++]) {
       $fh_next = open_cached($dir . "/" . $next->{file});
-      aio_readahead $fh_next, 0, -s $next;
+      # On machines with spare IO bandwidth this seemed to help, however I'm now
+      # running on VMs and this seems less of a help.
+      #aio_readahead $fh_next, 0, -s $next;
     }
 
     my @results;
@@ -80,22 +83,25 @@ sub do_match {
 	snippet => [$previous, $next],
 	match   => [$-[0], $+[0]]
       };
+      
+      last if ++$matches > $max;
     }
 
     $redis->publish($channel => encode_json \@results);
 
-    return if ++$matches > $max;
+    return if $matches > $max;
   }
 }
-use Time::HiRes qw(time);
+
 print "$$: ready\n";
+
 while(1) {
   while(my $item = $redis->blpop("queue:cpangrep:slabsearch", 60)->recv) {
     last unless $item->[0];
     print "$$: processing job: $item->[1]\n";
     my $job = decode_json $item->[1];
     my $slabs = [map decode_json($_), @{$redis->lrange($job->{slablist}, @{$job->{slabs}})->recv}];
-    my $max = $job->{max} || 3_000;
+    my $max = 500;
     my $start = time;
     do_match($job->{re}, $max, $job->{notify}, $slabs);
     $redis->publish($job->{notify} => encode_json {

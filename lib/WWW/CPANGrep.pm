@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 use v5.10;
-use Web::Simple 'CPANGrep';
+use Web::Simple 'WWW::CPANGrep';
 
-package CPANGrep;
+package WWW::CPANGrep;
 use JSON;
 use POSIX qw(ceil);
 use AnyEvent::Redis;
@@ -33,20 +33,39 @@ sub dispatch_request {
     [ 'Content-type' => 'text/html' ],
     [ join "", <$fh> ]
     ]
+  },
+  sub (GET + /api + ?q=&limit~&exclude_file~) {
+    my($self, $q, $limit, $exclude_file) = @_;
+    $limit ||= 100;
+    my $r = $self->_search($q, $exclude_file);
+
+    return [ 200, ['Content-type' => 'application/json' ],
+             [ encode_json({
+                 count => scalar @{$r->{results}},
+                 duration => $r->{duration},
+                 results => [@{$r->{results}}[0 .. $limit]]
+               })]
+           ];
   }
 };
 
-sub search(GET + / + ?q=&page~) {
-  my($self, $q, $page_number) = @_;
+sub search(GET + / + ?q=&page~&exclude_file~) {
+  my($self, $q, $page_number, $exclude_file) = @_;
 
-  state $counter = 0;
-
-  print "Search for $q\n";
-  my $redis = AnyEvent::Redis->new(host => $config->{"server.queue"});
-
-  my $cache = $redis->get("querycache:" . uri_escape_utf8($q))->recv;
-  if($cache) {
+  my $r = $self->_search($q, $exclude_file);
+  if(ref $r eq 'HASH') {
+    
+    return [ 200, ['Content-type' => 'text/html'],
+             [ render_response($q, $r->{results}, $r->{duration}, $page_number)->to_html ] ];
+  } else {
+    return $r;
   }
+}
+
+sub _search {
+  my($self, $q, $exclude_file) = @_;
+
+  my $redis = AnyEvent::Redis->new(host => $config->{"server.queue"});
 
   my $re = eval { re_compiler($q) };
 
@@ -58,7 +77,7 @@ sub search(GET + / + ?q=&page~) {
     return [ 200, ['Content-type' => 'text/html'],
       [ "Please don't use lookbehind or anything else RE2 doesn't understand!" ] ];
 
-  } elsif("abcdefgh" x 20 =~ /$re/) {
+  } elsif("abcdefgh" x 20 =~ $re || $q =~ /^.$/) {
     # RE2 is quite happy with most things you throw at it, but really doesn't
     # like lots of long matches, this is just a lame check.
     return [ 200, ['Content-type' => 'text/html'],
@@ -67,9 +86,47 @@ sub search(GET + / + ?q=&page~) {
 
   my $start = AE::time;
 
+  my $results;
+  my $response;
+  my $cache = $redis->get("querycache:" . uri_escape_utf8($q))->recv;
+  if($cache) {
+    $results = decode_json($cache);
+  } else {
+    my %res = do_search($redis, $q);
+    if($res{error}) {
+      $response = "Something went wrong! $res{error}";
+      return [ 200, ['Content-type' => 'text/html'], [ $response ] ];
+    } else {
+      my $redis_cache = AnyEvent::Redis->new(host => $config->{"server.queue"});
+      $redis_cache->setex("querycache:" . uri_escape_utf8($q), 1800, encode_json($res{results}))->recv;
+      $results = $res{results};
+    }
+  }
+
+  if($exclude_file) {
+    $exclude_file = re_compiler($exclude_file);
+    $results = [grep $_->{file}->{file} !~ $exclude_file, @{$results}];
+  }
+
+  my $duration = AE::time - $start;
+  printf "Took %0.2f %s\n", $duration, $cache ? "(cached)" : "";
+
+  return { results => $results, duration => $duration };
+}
+
+sub re_compiler {
+  use re::engine::RE2;
+  eval(q{ sub { qr/$_[0]/ } })->(shift);
+}
+
+sub do_search {
+  my($redis, $q) = @_;
+  state $counter = 0;
+
+  my @results;
   my $slab = $config->{"key.slabs"};
   my $len = $redis->llen($slab)->recv;
-  my $req = 6;
+  my $req = $config->{"matcher.concurrency"};
   my $c = int $len/$req;
   my $notify = "webfe1." . $$ . "." . ++$counter;
   for(1 .. $req) {
@@ -84,7 +141,6 @@ sub search(GET + / + ?q=&page~) {
   }
 
   my $redis_other = AnyEvent::Redis->new(host => $config->{"server.slab"});
-  my @results;
   # cv used to manage lifetime of subscription and zrevrangebyscore results.
   my $other_cv = AE::cv;
   $other_cv->begin;
@@ -154,23 +210,7 @@ sub search(GET + / + ?q=&page~) {
       }
     });
 
-  my %res = $other_cv->recv;
-  my $duration = AE::time - $start;
-  print "Took $duration\n";
-
-  my $response;
-  if($res{error}) {
-    $response = "Something went wrong! $res{error}";
-  } else {
-    $response = render_response($q, \@results, $duration, $page_number)->to_html;
-  }
-
-  return [ 200, ['Content-type' => 'text/html'], [ $response ] ];
-}
-
-sub re_compiler {
-  use re::engine::RE2;
-  eval(q{ sub { qr/$_[0]/ } })->(shift);
+  return results => \@results, $other_cv->recv;
 }
 
 sub render_response {
@@ -235,4 +275,4 @@ sub render_response {
   return $output;
 }
 
-CPANGrep->run_if_script;
+WWW::CPANGrep->run_if_script;

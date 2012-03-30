@@ -6,8 +6,8 @@ something you probably want to use the site, not try and install this ;-)
 To index the whole of CPAN takes an hour or two on a good box. For development
 I currently build an index of just part of CPAN (all dists under /id/D/). You
 can do this by C<grep 'D/D./' 02packages.details.txt.gz> and re-adding the
-header. Hopefully soon L<fakecpan|http://www.fakecpan.org> will provide a
-solution to this.
+header. Alternatively the default development configuration will index a sample
+CPAN from L<fakecpan|http://www.fakecpan.org>.
 
 =head2 Components
 
@@ -15,18 +15,29 @@ solution to this.
 
 =item * cpangrep-index
 
-Run with cpangrep-index --cpan_dir /path/to/cpan --slab_dir /data/cpangrep/extract
+Run this to start with:
+
+  bin/cpangrep-index [--cpan_dir /path/to/cpan --slab_dir /data/cpangrep/extract]
+
+If you omit the --cpan_dir and --slab_dir options you'll get the fakecpan
+configured in etc/config and shipped with this.
 
 =item * WWW::CPANGrep
 
-The web frontend. Run with starman -Ilib lib/WWW/CPANGrep.pm or other plack
-server.
+The web frontend. Run with:
+
+  starman -Ilib lib/WWW/CPANGrep.pm
+  
+(or other plack server.)
 
 There's also a version that wraps this in L<Plack::Debug> in F<debug.psgi>.
 
 =item * cpangrep-matcher
 
-Backend workers that do the matching, based on a redis queue.
+Backend workers that do the matching, based on a redis queue. This should be running along with the web
+frontend, all the time:
+
+  bin/cpangrep-matcher
 
 =item * Redis
 

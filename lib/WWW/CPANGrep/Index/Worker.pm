@@ -2,6 +2,7 @@ package WWW::CPANGrep::Index::Worker;
 use Moose;
 use namespace::autoclean;
 
+use JSON;
 use CPAN::Visitor;
 use File::MMagic::XS;
 use WWW::CPANGrep::Slabs;
@@ -17,6 +18,11 @@ has cpan_dir => (
 has slab_dir => (
   is => 'ro',
   isa => 'Str',
+);
+
+has jobs => (
+  is => 'ro',
+  isa => 'Int'
 );
 
 has _slab => (
@@ -44,17 +50,20 @@ has _mmagic => (
 sub run {
   my($self, $queue) = @_;
 
-  my $c = 16;
+  # Do not call ->redis before this forks.
+  # (XXX: Probably should make Tie::Redis handle this somehow).
 
-  for(1 .. $c) {
+  for(1 .. ($self->jobs - 1)) {
     my $pid = fork;
     if($pid) {
-      if($_ == $c) { exit }
       next;
     } else {
       last;
     }
   }
+
+  my $redis_conn = (tied %{$self->redis})->{_conn};
+  $redis_conn->incr("cpangrep:indexer");
 
   while(my $dist = pop @{$self->redis->{$queue}}) {
     print "Processing $dist\n";
@@ -74,11 +83,15 @@ sub run {
   $self->redis->{"new-index"} ||= [];
   push @{$self->redis->{"new-index"}}, @{$self->redis->{$name}};
 
-  if(!@{$self->redis->{$queue}}) {
-    my $redis = tied %{$self->redis};
-    # XXX: This should be read from the config
-    $redis->rename("new-index", "cpangrep:slabs")->recv;
-    $redis->save->recv;
+  if($redis_conn->decr("cpangrep:indexer") == 0) {
+    $redis_conn->rename("cpangrep:slabs", "cpangrep:slabs-old");
+    $redis_conn->rename("new-index", "cpangrep:slabs");
+    $redis_conn->save;
+
+    for my $i(@{$self->redis->{"cpangrep:slabs-old"}}) {
+      my $slab = decode_json $i;
+      unlink $slab->{file};
+    }
   }
 }
 
@@ -100,7 +113,7 @@ sub index_dist {
   for my $file(@files) {
     next if $file eq 'MANIFEST';
     my $mime_type = $self->_mmagic->get_mime($file);
-    $redis->hincrby("mime_stats", $mime_type, 1);
+    #$redis->hincrby("mime_stats", $mime_type, 1);
 
     if($mime_type !~ /^text/) {
       warn "Ignoring binary file $file ($mime_type, in $dist)\n";

@@ -1,23 +1,30 @@
 package WWW::CPANGrep::Index;
+use Config::GitLike;
 use Moose;
 use namespace::autoclean;
 use Parse::CPAN::Packages;
 use WWW::CPANGrep::Index::Worker;
+use FindBin ();
+use Cwd 'abs_path';
 
 with 'MooseX::Getopt';
 with 'WWW::CPANGrep::Role::RedisConnection';
 
+my $config = Config::GitLike->new(
+  confname => "cpangrep"
+)->load_file("$FindBin::RealBin/../etc/config");
+
 has cpan_dir => (
   is => 'ro',
   isa => 'Str',
-  required => 1,
+  default => sub { abs_path $config->{"location.cpan"} },
   documentation => "Directory where CPAN mirror resides",
 );
 
 has slab_dir => (
   is => 'ro',
   isa => 'Str',
-  required => 1,
+  default => sub { abs_path $config->{"location.slabs"} },
   documentation => "Directory in which to save 'slabs' extracted from CPAN",
 );
 
@@ -41,12 +48,19 @@ sub index {
   $self->redis->{$queue} = \@queue;
   print "Inserted ", scalar(@{$self->redis->{$queue}}), " dists into $queue\n";
 
+  if($self->redis->{"cpangrep:indexer"}) {
+    warn "Semaphore not 0, previous run failed / in progress?";
+  }
+
+  $self->redis->{"cpangrep:indexer"} = 0;
+
   delete $self->redis->{"new-index"};
 
   WWW::CPANGrep::Index::Worker->new(
     cpan_dir => $self->cpan_dir,
     slab_dir => $self->slab_dir,
     redis_server => $self->redis_server,
+    jobs => $self->jobs,
   )->run($queue);
 }
 
