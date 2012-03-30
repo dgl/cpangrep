@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Acme-Buffy-1.5.tar.gz' => {
+    'md5' => '1c04e547733c46fe44baba53b4d41e7c',
+    'md5-ungz' => '307915eb5f23913b1f6ccd71fbb8fe62',
+    'mtime' => '2011-04-17',
+    'sha256' => '50d00f565bdcc4b7203a36e3b0a972e228d9b7125296a76134a8c1aca664ba19',
+    'sha256-ungz' => '25cc20a8024ff9d2313d94ad8721cce91c12a4b53ef13e5769a177b478f28682',
+    'size' => 3387
+  }
+};

@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:14 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Perl-PrereqScanner-1.002.tar.gz' => {
+    'md5' => 'f9f6644996899835c6b309e9ab4388e0',
+    'md5-ungz' => 'cf5ccbf01db5e65588a1c880ec5f458f',
+    'mtime' => '2011-04-17',
+    'sha256' => 'bb282a7d38b2267c37f33603a29dae5861f0e6b7de88e324bebc0579e9c515b3',
+    'sha256-ungz' => 'c30da31568efc1b9c8ff444ebde1d61aaff05e7ba95744d9e16563504f0eacbd',
+    'size' => 16329
+  }
+};

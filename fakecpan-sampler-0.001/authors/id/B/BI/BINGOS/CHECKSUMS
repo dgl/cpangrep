@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'AAAA-Crypt-DH-0.04.tar.gz' => {
+    'md5' => '50218b16400bf39a6abca39ad4facec4',
+    'md5-ungz' => 'e819028e8174c0e08c4d090fe6c944e0',
+    'mtime' => '2011-04-17',
+    'sha256' => '0530e70b8627cd414c28f145253e42d09cc47c18f2b918c6acf347f0a7f665e2',
+    'sha256-ungz' => '659bf679524c87916e795bb4106fa0feda4d806f510b17d05cee999bc8a252d6',
+    'size' => 31067
+  }
+};

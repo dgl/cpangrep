@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Lexical-Types-0.11.tar.gz' => {
+    'md5' => '8de76d1d9d6c597376d6eb8c97c0d8ce',
+    'md5-ungz' => '392b4f2d2130098886444eff5fb5010b',
+    'mtime' => '2011-04-17',
+    'sha256' => 'd529071256d9afec454c0c61560a3e173261e38831362ce3e138c759258ebe9c',
+    'sha256-ungz' => '94492b6fe02b22c649a008b7b47862d9655354b77f9d6e3cd2ae82a1f8736a69',
+    'size' => 24351
+  }
+};

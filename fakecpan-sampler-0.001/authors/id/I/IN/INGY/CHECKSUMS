@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Mousse-0.12.tar.gz' => {
+    'md5' => '9f81cdb39715cd1e567116d29f78f120',
+    'md5-ungz' => '846209a1c8a6dcf024b887b6915f0b60',
+    'mtime' => '2011-04-17',
+    'sha256' => 'db572dee1b9c58f6039923f2d1c5e354e76a76908206099a2859498b53cc89c3',
+    'sha256-ungz' => 'b05f89580d898165ec0b02a72ed804cc75be4ce16a07fd1775f7dfc5585c670a',
+    'size' => 55046
+  }
+};

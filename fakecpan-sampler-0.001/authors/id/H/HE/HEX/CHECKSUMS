@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Acme-Lingua-Pirate-Perl-0.13.tar.gz' => {
+    'md5' => '2f932e5da9f0aa4afc987d5b9fedb463',
+    'md5-ungz' => 'dbba2ad8606412defcc43ce6cb4ef17f',
+    'mtime' => '2011-04-17',
+    'sha256' => '5ef70ccc40d64208682419a6f47c249c1738a2806e36eafae63de513dfd37704',
+    'sha256-ungz' => '1e77d2f923e4718f117d26b668ccfc6d6a2c58f519eb228f9f8c20ee5c1d3c2e',
+    'size' => 4559
+  }
+};

@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Religion-1.03.tar.gz' => {
+    'md5' => 'add227a3b863dd466e8dd84f9b5deb6a',
+    'md5-ungz' => '66b8e4650af4b4711b1f145aaa2f719c',
+    'mtime' => '2011-04-17',
+    'sha256' => 'cd102f4fb8776f8262a64fa78699d7964edc5a2305adecfd3714a94686518b8e',
+    'sha256-ungz' => 'f66362c13a013262b8bcd81d57dbd2451a2e63154d6584117a274b365738bc80',
+    'size' => 4467
+  }
+};

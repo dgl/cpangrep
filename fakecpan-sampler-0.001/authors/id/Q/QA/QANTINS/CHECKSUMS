@@ -1,0 +1,9 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'BitTorrent-V0.1.zip' => {
+    'md5' => 'd9b66d207f166bd46e21547790ead042',
+    'mtime' => '2011-04-17',
+    'sha256' => '33407870d1336d030927412017ea07db1cbd05f6992bd8e54d92986deac4a80d',
+    'size' => 8629
+  }
+};

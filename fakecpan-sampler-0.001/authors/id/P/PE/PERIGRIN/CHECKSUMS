@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'XML-NamespaceFactory-1.00.tar.gz' => {
+    'md5' => '7690c6c95ef3f26e5279f456ed6b3cf0',
+    'md5-ungz' => '19727604fcd8093081c3d021eb50a319',
+    'mtime' => '2011-04-17',
+    'sha256' => '3a3a31504c44d5441d23a02c07217631149e463bcad67a7593405cf1c17eae6b',
+    'sha256-ungz' => '0b56f9262a42aa0122c2e16bc7c703ad4e7a9e3667cc15976366ded5e1aeb7d1',
+    'size' => 2392
+  }
+};

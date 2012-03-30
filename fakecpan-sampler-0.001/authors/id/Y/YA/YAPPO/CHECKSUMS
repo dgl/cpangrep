@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'PHP-Functions-Mail-0.04.tar.gz' => {
+    'md5' => '78440795ec272d9f5a61a2a76052a2cd',
+    'md5-ungz' => 'bb6f2c24121328c47856d5e87fa95d28',
+    'mtime' => '2011-04-17',
+    'sha256' => 'ab9ace8be8db8dafeb03fcba1fcc3a9ef2b446e20bffd645d5d26ffe71f90e9b',
+    'sha256-ungz' => '4433b9ececcb5477a886c934ade1d88f5ca917a03d990700b48fef1663fddfa5',
+    'size' => 3145
+  }
+};

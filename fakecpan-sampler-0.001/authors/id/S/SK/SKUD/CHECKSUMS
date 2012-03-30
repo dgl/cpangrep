@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Metaweb-0.05.tar.gz' => {
+    'md5' => '44d13a5a60d7de42922aa2d93aa55726',
+    'md5-ungz' => 'bb81acabd601256655329e1f55e72c4f',
+    'mtime' => '2011-04-17',
+    'sha256' => 'be369aa5bb8de952a93b558827bda88cfe3e07599c81cc9ae1af391c37d06033',
+    'sha256-ungz' => 'e44485840c9ad11037ac8fe5ea45d520a5fcb271a1a06966420ad5cfada140ab',
+    'size' => 8602
+  }
+};

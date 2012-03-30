@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Digest-1.16.tar.gz' => {
+    'md5' => 'df65b3c12785ff9bbf14521551f0268d',
+    'md5-ungz' => 'c7851da4a3cfe8a7200fb0ad19cc5b9c',
+    'mtime' => '2011-04-17',
+    'sha256' => '4bb708bfd666deba42993f93dcec4f81a9f9b52e6aa450fe5b764b53216dea33',
+    'sha256-ungz' => 'bc59c0ddfdadaf574ad5f063c4d119d3022d8f01684f1fa26104dd116160fcee',
+    'size' => 8262
+  }
+};

@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:12 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Prompt-ReadKey-0.03.tar.gz' => {
+    'md5' => '235c51053192cdea35da79ba1ec27503',
+    'md5-ungz' => '4a13e46847acf67d62f27ce90e121907',
+    'mtime' => '2011-04-17',
+    'sha256' => '9a0f60056cca384858431119b674b91f08f0297244740160c99cf5102ffb592c',
+    'sha256-ungz' => '6a78550c3557555c33abb80777ba6e76dda1ee1dfc9aac8a34bdec65b0ae2c2f',
+    'size' => 9883
+  }
+};

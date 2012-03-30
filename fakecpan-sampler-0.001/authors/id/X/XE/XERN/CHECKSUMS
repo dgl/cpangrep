@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Acme-DoubleHelix-0.01.tar.gz' => {
+    'md5' => 'f7d2de96176dd1be23f47e1732279d75',
+    'md5-ungz' => '2cf08f5f07808410728dbe31e4a07c0e',
+    'mtime' => '2011-04-17',
+    'sha256' => '6ffe15e02b777e7afb0162ecd75c3930fea82194a0f1957bd4e3e4d8159e8f98',
+    'sha256-ungz' => 'f31fbd7b662bc8cde6e707338ded2e5f72aea488ebd78fc000f26df70b2b0fae',
+    'size' => 2175
+  }
+};

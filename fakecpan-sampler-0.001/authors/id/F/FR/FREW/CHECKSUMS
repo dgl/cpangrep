@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Log-Structured-0.001001.tar.gz' => {
+    'md5' => '2536ddeb74a18f8f753681d8ecf9552e',
+    'md5-ungz' => '68694e2f4fe23c6c4670474d3ee1cae1',
+    'mtime' => '2011-04-17',
+    'sha256' => '2b72036593bb40c8b7019c0d399cff48384ac044b4872d16907c586d3f05e9e0',
+    'sha256-ungz' => '9a9dd719d7ed838e2912195be2ce5ace0ddbdb72faf43f8dd3a3008810ad8734',
+    'size' => 13313
+  }
+};

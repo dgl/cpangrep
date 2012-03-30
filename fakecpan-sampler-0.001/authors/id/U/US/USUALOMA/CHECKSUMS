@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'PHP-Var-0.022.tar.gz' => {
+    'md5' => 'e46618a967bbb4ec523ea4cb9aadfc7a',
+    'md5-ungz' => '77db9b0db91033e4f23e2f3eac085b3b',
+    'mtime' => '2011-04-17',
+    'sha256' => '13ad938a7b1a437a609c3ae47299a65c1d9f9917db19ec0d55acd651c2365c1a',
+    'sha256-ungz' => '81aaccf6c2bac7a5c80c3b216552a47846196ba4709045b43d32c4458159f1df',
+    'size' => 30648
+  }
+};

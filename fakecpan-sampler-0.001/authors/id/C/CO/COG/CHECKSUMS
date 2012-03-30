@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Acme-AsciiArt2HtmlTable-0.01.tar.gz' => {
+    'md5' => '0636e94e74a7699d70b82ebd13cf7c77',
+    'md5-ungz' => 'dc4ca28a19f01fe2783fccecff3025bc',
+    'mtime' => '2011-04-17',
+    'sha256' => 'a652be4f6512e538849cd89b3bdcc3095e8a0b05fd495c06793e3ac59ff99516',
+    'sha256-ungz' => '8abd0bc518daf4e3a79b18b12c9f6778843786c3493e60c80dcf20adc485e53b',
+    'size' => 49165
+  }
+};

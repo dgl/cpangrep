@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Linux-UserXAttr-0.02.tar.gz' => {
+    'md5' => '755beb39c10d8cd756ad56717371e085',
+    'md5-ungz' => '79830f985c4c714f777f520d50c29c34',
+    'mtime' => '2011-04-17',
+    'sha256' => 'c39811c887008aee86c4e304d94ca85c62e42ce70908ca3d0216dd40844b0db2',
+    'sha256-ungz' => '9ec29521c9ce5e6ac6e2ce37a6bb0398b6a247b3d0d6707004c0bcbc1277d979',
+    'size' => 46774
+  }
+};

@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:14 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Sys-AlarmCall-1.2.tar.gz' => {
+    'md5' => '20a01645a2b0af9d6dd829683e76528b',
+    'md5-ungz' => '34bb350e48f3bd5124665291f0ed050f',
+    'mtime' => '2011-04-17',
+    'sha256' => '82a426a27abc127b53c901ebe9415e55980269531ae5473bafc8558c24f1cef3',
+    'sha256-ungz' => '53d1b74b77808a7c512d8e8afcbf96538f3c89cc1ca2cce220ba896c5b13ce4f',
+    'size' => 4814
+  }
+};

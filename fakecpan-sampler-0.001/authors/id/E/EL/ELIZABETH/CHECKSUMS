@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Thread-Pool-0.33.tar.gz' => {
+    'md5' => '4e1b093179552283260ab4722b468248',
+    'md5-ungz' => 'deee1e873b8d14deef361d51ce1f119c',
+    'mtime' => '2011-04-17',
+    'sha256' => '8f6a75951c4ddac765bd2de9ae507830c951ef9e690cb04f4dbf2c7546feafc0',
+    'sha256-ungz' => '10d27eba8a098a63a9744045942ff8e36707c50f9e892804175725776a65e1bf',
+    'size' => 27340
+  }
+};

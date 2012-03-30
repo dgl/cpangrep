@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:14 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Finance-Bank-NL-CLIEOP03-0.01.tar.gz' => {
+    'md5' => '69ca61e4b91e86d6f2f90e93d4439e7a',
+    'md5-ungz' => '2ebe1c255eb42dc7356ba1695f5afde1',
+    'mtime' => '2011-04-17',
+    'sha256' => '403d7102742227f8c4c38f7866a187f9f34ea5711bae7a0373fc4aa80bc1267b',
+    'sha256-ungz' => '05a8ac47c0cefbd70223576797a7de7e9702ab17b02fe1c0379a478c621d54e0',
+    'size' => 5903
+  }
+};

@@ -1,0 +1,11 @@
+# CHECKSUMS file written on Sun Apr 17 15:10:13 2011 GMT by CPAN::Checksums (v2.07)
+$cksum = {
+  'Math-Random-Brownian-0.03.tar.gz' => {
+    'md5' => '1fdfc7ce129aee5177f1f973012676df',
+    'md5-ungz' => 'b0d50d9a5e03e4f1aa5ffb1ab5dd39a7',
+    'mtime' => '2011-04-17',
+    'sha256' => '122250686f2de7dc6e6d793b516e2e7b93b5b9795fec2b71a2c705cbcc1c9c5c',
+    'sha256-ungz' => '431633f886bf7daab0b5aa4de10519642eba3f8c1ff2ccb61e2366e5ecef9022',
+    'size' => 62778
+  }
+};
