@@ -42,14 +42,14 @@ sub do_match {
   $re = qr/$re/m;
 
   my $i = 0;
-  my $fh_next = open_cached($dir . "/" . $process->[$i++]->{file});
+  my $fh_next = open_cached($dir . "/" . $process->[$i++]);
 
   for my $file(@$process) {
     my $fh = $fh_next;
     mmap my $pm, -s $fh, IO::AIO::PROT_READ, IO::AIO::MAP_SHARED, $fh or die $!;
 
     if(my $next = $process->[$i++]) {
-      $fh_next = open_cached($dir . "/" . $next->{file});
+      $fh_next = open_cached($dir . "/" . $next);
       # On machines with spare IO bandwidth this seemed to help, however I'm now
       # running on VMs and this seems less of a help.
       #aio_readahead $fh_next, 0, -s $next;
@@ -78,7 +78,7 @@ sub do_match {
       }
       
       push @results, {
-	zset    => $file->{zset},
+	zset    => $file,
 	text    => substr($pm, $previous, $next - $previous),
 	snippet => [$previous, $next],
 	match   => [$-[0], $+[0]]
@@ -100,7 +100,7 @@ while(1) {
     last unless $item->[0];
     print "$$: processing job: $item->[1]\n";
     my $job = decode_json $item->[1];
-    my $slabs = [map decode_json($_), @{$redis->lrange($job->{slablist}, @{$job->{slabs}})->recv}];
+    my $slabs = [@{$redis->lrange($job->{slablist}, @{$job->{slabs}})->recv}];
     my $max = 500;
     my $start = time;
     do_match($job->{re}, $max, $job->{notify}, $slabs);

@@ -48,13 +48,21 @@ sub index {
 sub finish {
   my($self) = @_;
 
+  my $r = (tied %{$self->redis})->{_conn};
+
   # Tie::Redis won't autovivify yet :(
   $self->redis->{$self->name} ||= [];
 
-  push @{$self->redis->{$self->name}}, encode_json {
-    file => $self->_slab->file_name,
-    zset => $self->_slab->zset_name
-  };
+  push @{$self->redis->{$self->name}}, $self->_slab->name;
+
+  for my $dist(keys %{$self->_slab->seen_dists}) {
+    my($author, $dist) = split m{/}, $dist, 2;
+
+    $self->redis->{"cpangrep:author:$author"} ||= [];
+    push @{$self->redis->{"cpangrep:author:$author"}}, $dist;
+
+    $r->hset("cpangrep:dists", $dist, $self->_slab->name);
+  }
 
   $self->_slab(undef);
 

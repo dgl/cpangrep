@@ -108,12 +108,12 @@ sub index_dist {
     }
   }, ".";
 
-  my $redis = tied %{$self->redis};
+  my $redis_conn = (tied %{$self->redis})->{_conn};
 
   for my $file(@files) {
     next if $file eq 'MANIFEST';
     my $mime_type = $self->_mmagic->get_mime($file);
-    #$redis->hincrby("mime_stats", $mime_type, 1);
+    $redis_conn->hincrby("mime_stats", $mime_type, 1);
 
     if($mime_type !~ /^text/) {
       warn "Ignoring binary file $file ($mime_type, in $dist)\n";

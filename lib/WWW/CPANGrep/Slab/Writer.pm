@@ -21,10 +21,10 @@ has redis => (
   required => 1,
 );
 
-has zset_name => (
+has name => (
   is => 'ro',
   isa => 'Str',
-  default => sub { "slab:zset:process:$$-" . ++$COUNTER },
+  default => sub { "slab:zset:$$-" . ++$COUNTER },
 );
 
 has rotate_size => (
@@ -33,13 +33,10 @@ has rotate_size => (
   default => sub { 10 * 1024 * 1024 }, # 10mb
 );
 
-has file_name => (
+has seen_dists => (
   is => 'ro',
-  isa => 'Str',
-  default => sub {
-    my($self) = @_;
-    "$$-" . time . "-" . ++$COUNTER;
-  },
+  isa => 'HashRef',
+  default => sub { {} },
 );
 
 has _size => (
@@ -54,7 +51,7 @@ has _fh => (
   lazy => 1,
   default => sub {
     my($self) = @_;
-    open my $fh, ">", $self->dir . "/" . $self->file_name or die $!;
+    open my $fh, ">", $self->dir . "/" . $self->name or die $!;
     binmode $fh;
     $fh;
   },
@@ -80,11 +77,13 @@ sub index {
 
   print {$self->_fh} $content, SLAB_SEPERATOR;
 
-  $self->redis->zadd($self->zset_name, $self->_size, encode_json {
+  $self->redis->zadd($self->name, $self->_size, encode_json {
       size => length($content),
       dist => $dist,
       file => $file
   });
+
+  $self->{seen_dists}{$dist}++;
 
   $self->_size($self->_size + length($content) + length SLAB_SEPERATOR);
 }
