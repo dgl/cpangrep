@@ -50,7 +50,7 @@
                   <li><code>author:</code> Search CPAN author ID.</li>
                 </ul>
 
-                For example <code>-dist:perl</code> to exclude perl, <code>file:.xs</code> to search only XS files or <code>-file:"ppport\.h"</code> to exclude ppport.h.
+                For example <code>-dist:^perl$</code> to exclude perl, <code>file:.xs</code> to search only XS files or <code>-file:"ppport\.h"</code> to exclude ppport.h.
 
 		<h2>Examples</h2>
 		A picture is worth a thousand words, an example more. <small>&ndash; I just made that up.</small>
@@ -61,7 +61,7 @@
 		<li><a href="/?q=(?i:this+should+work,+but)">"this should work, but"...</a></li>
 		<li><a href="/?q=%5E%23.*ACHTUNG">^#.*ACHTUNG</a></li>
 		<li><a href="/?q=%5E%3Dhead1+NAME%5B%5Cr%5Cn+%5D%2B.*Foo">Files with a "NAME" POD section with "Foo" on the first line.</a>
-                <li><a href="/?q=file:\.(?i:xs|c(?:c?|pp))$+-dist:perl+SVt_REGEXP">XS, C or C++ files not in the perl core that reference SVt_REGEXP</a>
+                <li><a href="/?q=file:\.(?i:xs|c(?:c?|pp))$+-dist:^perl$+SVt_REGEXP">XS, C or C++ files not in the perl core that reference SVt_REGEXP</a>
 		</ul>
 		(If you find any more good examples please send them my way.)
 
