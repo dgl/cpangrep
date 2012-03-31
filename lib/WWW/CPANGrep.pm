@@ -126,8 +126,6 @@ sub render_response {
           $package =~ s/\.(?:tar\.gz|zip|tar\.bz2)$//;
           my $author = ($result->{dist} =~ m{^([^/]+)})[0];
 
-          use Data::Dump qw(pp); pp $result;
-
           $_ = $_->select('.files')->repeat_content([map {
             my $file = $_;
             sub {
