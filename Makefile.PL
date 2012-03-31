@@ -20,6 +20,7 @@ my %opts = (
     'EV' => 0,
     'IO::AIO' => 0,
     'CPAN::DistnameInfo' => 0,
+    'Starman' => 0,
   }
 );
 

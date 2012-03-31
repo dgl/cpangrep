@@ -9,4 +9,4 @@ if ! pgrep redis-server; then
 fi
 
 perl bin/cpangrep-matcher&
-exec perl `which starman` app.psgi
+exec starman app.psgi
