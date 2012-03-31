@@ -1,5 +1,7 @@
 # -*- mode: org -*-
 
+* Why is something leaking Redis clients (part of the Search.pm refactor maybe?)
+
 * Consistent use of config
 * Caching (at least for basic paging to avoid searches all the time)
 
