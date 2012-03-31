@@ -2,6 +2,7 @@ package WWW::CPANGrep::Search;
 use 5.014;
 use AnyEvent;
 use Config::GitLike;
+use CPAN::DistnameInfo;
 use JSON;
 use Moo;
 require re::engine::RE2;
@@ -49,15 +50,20 @@ sub _parse_search {
   my %options = (
     file => sub {
       my($file, $type) = @_;
-      { type => "file", re => $file, negate => $type eq '-' }
+      # Shortcut for .pm -> \.(?i:pm)$
+      $file = '\\(?i:' . $file . ')$' if $file =~ /^\.\w+$/;
+      { type => "file", re => _re2_compile($file), negate => $type eq '-' }
     },
     dist => sub {
       my($dist, $type) = @_;
-      { type => "dist", re => $dist, negate => $type eq '-' }
+      { type => "dist", re => _re2_compile($dist), negate => $type eq '-' }
     },
     author => sub {
       my($author, $type) = @_;
-      { type => "author", re => $author, negate => $type eq '-' }
+      { type => "author",
+        re => _re2_compile($author =~ /^\w+/ ? uc $author : $author),
+        negate => $type eq '-'
+      }
     },
   );
 
@@ -70,7 +76,7 @@ sub _parse_search {
     next unless $opt;
     my $type = $+{type};
     my $arg = $+{arg} =~ s/(?:^"(.*)"$|(.*))/$2||$1 =~ s{\\(.)}{$1}gr/re;
-    push @options, $opt->(_re2_compile($arg), $type);
+    push @options, $opt->($arg, $type);
   }
 
   $q =~ s/\s+$//;
@@ -216,8 +222,8 @@ sub filter_results {
     # This could probably be optimised a lot, but take the lazy approach for now.
     my $predicate = 
       $option->{type} eq 'file'   ? sub { $_->{file}->{file} =~ $option->{re} } :
-      $option->{type} eq 'dist'   ? sub { $_->{file}->{dist} =~ $option->{re} } :
-      $option->{type} eq 'author' ? sub { $_->{file}->{dist} =~ $option->{re} } :
+      $option->{type} eq 'dist'   ? sub { CPAN::DistnameInfo->new($_->{file}->{dist})->dist =~ $option->{re} } :
+      $option->{type} eq 'author' ? sub { (split m{/}, $_->{file}->{dist}, 2)[0] =~ $option->{re} } :
       die "Unkown type";
     my $matcher = $predicate;
     $matcher = sub { !$predicate->() } if $option->{negate};

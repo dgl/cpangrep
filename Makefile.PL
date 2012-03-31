@@ -19,6 +19,7 @@ my %opts = (
     'Config::GitLike' => 0,
     'EV' => 0,
     'IO::AIO' => 0,
+    'CPAN::DistnameInfo' => 0,
   }
 );
 
