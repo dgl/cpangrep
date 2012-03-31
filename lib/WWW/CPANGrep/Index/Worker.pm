@@ -88,9 +88,8 @@ sub run {
     $redis_conn->rename("new-index", "cpangrep:slabs");
     $redis_conn->save;
 
-    for my $i(@{$self->redis->{"cpangrep:slabs-old"}}) {
-      my $slab = decode_json $i;
-      unlink $slab->{file};
+    for my $slab(@{$self->redis->{"cpangrep:slabs-old"}}) {
+      unlink $self->slab_dir . "/" . $slab;
     }
   }
 }
