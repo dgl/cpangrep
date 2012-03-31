@@ -56,12 +56,25 @@ sub index {
 
   delete $self->redis->{"new-index"};
 
-  WWW::CPANGrep::Index::Worker->new(
+  my $done = WWW::CPANGrep::Index::Worker->new(
     cpan_dir => $self->cpan_dir,
     slab_dir => $self->slab_dir,
     redis_server => $self->redis_server,
     jobs => $self->jobs,
   )->run($queue);
+
+  if($done) {
+    my $redis_conn = (tied %{$self->redis})->{_conn};
+    eval { $redis_conn->rename("cpangrep:slabs", "cpangrep:slabs-old") };
+    $redis_conn->rename("new-index", "cpangrep:slabs");
+    $redis_conn->save;
+
+    for my $slab(@{$self->redis->{"cpangrep:slabs-old"}}) {
+      unlink $self->slab_dir . "/" . $slab;
+    }
+
+    $self->redis->{"cpangrep:lastindex"} = $packages->last_updated;
+  }
 }
 
 __PACKAGE__->meta->make_immutable;

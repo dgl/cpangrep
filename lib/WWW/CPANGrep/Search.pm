@@ -211,15 +211,15 @@ sub search {
   }
 
   my @finish = $other_cv->recv;
-  return results => $self->filter_results(\@results), @finish;
+  return $self->filter_results(\@results), @finish;
 }
 
+# This could probably be optimised a lot, but take the lazy approach for now.
 sub filter_results {
   my($self, $results) = @_;
   my @results = @$results;
 
   for my $option(@{$self->_options}) {
-    # This could probably be optimised a lot, but take the lazy approach for now.
     my $predicate = 
       $option->{type} eq 'file'   ? sub { $_->{file}->{file} =~ $option->{re} } :
       $option->{type} eq 'dist'   ? sub { CPAN::DistnameInfo->new($_->{file}->{dist})->dist =~ $option->{re} } :
@@ -230,7 +230,45 @@ sub filter_results {
     @results = grep $matcher->(), @results;
   }
 
-  return \@results;
+  my $count = scalar @results;
+
+  # This could probably do with some work, currently ordering by dist with the most matches.
+  # Would maybe make sense to do per file counts, weight t/, etc less, and so on.
+  my %dists;
+  for my $result(@results) {
+    push @{$dists{$result->{file}->{dist}}}, $result;
+  }
+
+  my @ordered;
+  for my $dist(sort { @{$dists{$b}} <=> @{$dists{$a}} } keys %dists) {
+    my @dist_results = @{$dists{$dist}};
+
+    my %files;
+    for my $result(@dist_results) {
+      push @{$files{$result->{file}->{file}}}, $result;
+    }
+
+    push @ordered, { dist => $dist, files => [], truncated => 0 };
+
+    my $i = 0;
+    for my $file(sort { lc $a cmp lc $b } keys %files) {
+      my @file_results = @{$files{$file}};
+
+      if(@file_results > 3 && keys %files > 1) {
+        @file_results = @file_results[0 .. 2];
+        $file_results[-1]->{truncated} = 1;
+      }
+
+      push $ordered[-1]->{files}, { file => $file, results => \@file_results };
+
+      if($i++ >= 20 / keys %dists) {
+        $ordered[-1]->{truncated} = 1;
+        last;
+      }
+    }
+  }
+
+  return results => \@ordered, count => $count;
 }
 
 1;

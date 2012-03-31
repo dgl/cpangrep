@@ -10,7 +10,15 @@
 	<meta name="robots" content="all" />
         <link rel="icon" type="image/png" href="/favicon.png" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	<link rel="stylesheet" type="text/css" media="screen, projection" href="//dg.cx/cpangrep/cpangrep.css" />
+        <link rel="stylesheet" type="text/css" media="screen, projection" href="//dg.cx/cpangrep/cpangrep.css" />
+        <style>
+          .footer {
+            position: absolute;
+            top: 90%;
+            width: 98%;
+            text-align: center;
+          }
+        </style>
 </head>
 
 <body onload="document.forms[0].q.focus();">
@@ -30,8 +38,8 @@
 		</form>
 
 		<div class="footer">
-		<a href="about.html">About</a> &mdash; <a href="https://plus.google.com/112646864076593101108/posts">Status/updates on Google+</a>
-		<span style="position: absolute; right: 10px; bottom: 10px;"><a href="//bigv.io"><img src="//s.cpan.me/bigv_poweredby_landscape_143_x_49.png" border="0"></span>
+                  <a href="about.html">About</a> &mdash; <a href="https://plus.google.com/112646864076593101108/posts">Status/updates on Google+</a><br/>
+                  <small>Index last updated: <span id="lastupdate"></span></small>
 		</div>
 
 	</div>

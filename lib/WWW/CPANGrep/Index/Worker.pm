@@ -78,20 +78,11 @@ sub run {
   }
 
   my $name = $self->_slab->finish;
-
   # Tie::Redis currently won't autovivify :(
   $self->redis->{"new-index"} ||= [];
   push @{$self->redis->{"new-index"}}, @{$self->redis->{$name}};
 
-  if($redis_conn->decr("cpangrep:indexer") == 0) {
-    eval { $redis_conn->rename("cpangrep:slabs", "cpangrep:slabs-old") };
-    $redis_conn->rename("new-index", "cpangrep:slabs");
-    $redis_conn->save;
-
-    for my $slab(@{$self->redis->{"cpangrep:slabs-old"}}) {
-      unlink $self->slab_dir . "/" . $slab;
-    }
-  }
+  return $redis_conn->decr("cpangrep:indexer") == 0;
 }
 
 sub index_dist {
