@@ -51,7 +51,7 @@ sub _parse_search {
     file => sub {
       my($file, $type) = @_;
       # Shortcut for .pm -> \.(?i:pm)$
-      $file = '\\(?i:' . $file . ')$' if $file =~ /^\.\w+$/;
+      $file = '(?i:\\' . $file . ')$' if $file =~ /^\.\w+$/;
       { type => "file", re => _re2_compile($file), negate => $type eq '-' }
     },
     dist => sub {
