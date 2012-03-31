@@ -34,9 +34,23 @@
 		</div>
 
 		<h2>Description</h2>
-		<p>Akin to Google's Code Search, this aims to search all the code found on CPAN. It concenrates on searching code; if you just want to look for a module use search.cpan.org instead.</p>
+                <p>Akin to Google's former Code Search, this aims to search all the code found on CPAN. It
+                concenrates on searching code; if you just want to look for a module use <a
+                  href="//metacpan.org">MetaCPAN</a> instead.</p>
+
 		<p><a name="re" />Regular Expressions are supported via re::engine::RE2 (which wraps RE2 that originated from Google's Code Search). This means that the regexps supported are mostly Perl compatible but are not totally compatible with Perl. Of particular note is look-ahead and look-behind are not supported, for more details see <a href="http://code.google.com/p/re2/wiki/Syntax">RE2's supported syntax</a>. A future version may implement more advanced syntax so it is not just limited to regexps, and can filter out matches by NOT, but this isn't yet supported.</p>
-		<p>(Due to performance concerns re::engine::RE2's ability to fallback to Perl regexps is disabled.)</p>
+                  <p>(Due to performance concerns re::engine::RE2's ability to fallback to Perl regexps is disabled.)</p>
+
+                <h2>Syntax</h2>
+
+                The following operators are supported, they accept regexps and negation with a <code>-</code> prepended to their name.
+                <ul>
+                  <li><code>file:</code> Search filenames within a distribution.</li>
+                  <li><code>dist:</code> Search distribution names.</li>
+                  <li><code>author:</code> Search CPAN author ID.</li>
+                </ul>
+
+                For example <code>-dist:perl</code> to exclude perl, <code>file:.xs</code> to search only XS files or <code>-file:"ppport\.h"</code> to exclude ppport.h.
 
 		<h2>Examples</h2>
 		A picture is worth a thousand words, an example more. <small>&ndash; I just made that up.</small>
@@ -47,6 +61,7 @@
 		<li><a href="/?q=(?i:this+should+work,+but)">"this should work, but"...</a></li>
 		<li><a href="/?q=%5E%23.*ACHTUNG">^#.*ACHTUNG</a></li>
 		<li><a href="/?q=%5E%3Dhead1+NAME%5B%5Cr%5Cn+%5D%2B.*Foo">Files with a "NAME" POD section with "Foo" on the first line.</a>
+                <li><a href="/?q=file:\.(?i:xs|c(?:c?|pp))$+-dist:perl+SVt_REGEXP">XS, C or C++ files not in the perl core that reference SVt_REGEXP</a>
 		</ul>
 		(If you find any more good examples please send them my way.)
 
