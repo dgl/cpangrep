@@ -4,39 +4,104 @@ use AnyEvent;
 use Config::GitLike;
 use JSON;
 use Moo;
+require re::engine::RE2;
 use Scalar::Util qw(blessed);
+use Text::Balanced qw(gen_delimited_pat);
 
 # TODO: stick in a module or something
 my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config");
 use constant MAX => 1_000;
 
 has q => (
-  is => 'ro',
+  is => 'rw',
   required => 1,
   isa => sub {
     die "Enter more characters to search for, please.\n"
       unless length $_[0] > 1;
-  }
+  },
 );
 
-has re => (
-  is => 'ro',
+has _re => (
+  is => 'rw',
   isa => sub { _check_re(shift) },
-  default => sub { shift->q },
   coerce => sub {
-    use re::engine::RE2;
-    $_[0] = eval(q{ sub { qr/$_[0]/ } })->($_[0])
+    $_[0] = _re2_compile($_[0])
       unless blessed $_[0] && $_[0]->isa("re::engine::RE2");
   }
 );
+
+has _options => (
+  is => 'rw',
+  isa => sub { die "Expected array ref" unless ref $_[0] eq 'ARRAY' },
+);
+
+sub BUILD {
+  my($self) = @_;
+
+  my($re, $options) = _parse_search($self->q);
+  $self->_re($re);
+  $self->_options($options);
+}
+
+sub _parse_search {
+  my($q) = @_;
+
+  my %options = (
+    file => sub {
+      my($file, $type) = @_;
+      { type => "file", re => $file, negate => $type eq '-' }
+    },
+    dist => sub {
+      my($dist, $type) = @_;
+      { type => "dist", re => $dist, negate => $type eq '-' }
+    },
+    author => sub {
+      my($author, $type) = @_;
+      { type => "author", re => $author, negate => $type eq '-' }
+    },
+  );
+
+  my @options;
+  my $opt_re = '(?:' . join('|', keys %options) . ')';
+  my $arg_re = '(?:' . gen_delimited_pat(q{"/}) . '|\S+)';
+
+  while($q =~ s/(^|\s)(?<type>-?)(?<opt>$opt_re):(?<arg>$arg_re)(?:$|\s)/$1/g) {
+    my $opt = $options{$+{opt}};
+    next unless $opt;
+    my $type = $+{type};
+    my $arg = $+{arg} =~ s/(?:^"(.*)"$|(.*))/$2||$1 =~ s{\\(.)}{$1}gr/re;
+    push @options, $opt->(_re2_compile($arg), $type);
+  }
+
+  $q =~ s/\s+$//;
+
+  return $q, \@options;
+}
+
+sub _re2_compiler {
+  use re::engine::RE2 -strict => 1;
+  qr/$_[0]/;
+}
+
+sub _re2_compile {
+  my $re = eval { _re2_compiler($_[0]) };
+
+  if(!$re) {
+    my $error = $@;
+    # RE2 says 'invalid perl operator', which is a tad confusing out of context.
+    $error =~ s/perl //;
+    $error =~ s/at .*\n//;
+    die "Regexp '$_[0]' unparsable -- RE2 may not support the syntax. ($error)\n";
+  }
+
+  $re;
+}
 
 sub _check_re {
   my($re) = @_;
 
   if(!$re) {
     die "Sorry, I can't make sense of that.\n";
-  } elsif(!$re->isa("re::engine::RE2")) {
-    die "Please don't use lookbehind or anything else RE2 doesn't understand.\n";
   }
 
   my($min, $max) = $re->possible_match_range;
@@ -100,7 +165,6 @@ sub search {
               }
               # XXX: Clean this up.
               if($j->{snippet}->[0] < $file_offset) {
-                print "($j->{snippet}->[0] < $file_offset)\n";
                 $j->{text} = substr $j->{text}, $file_offset - $j->{snippet}->[0];
                 $j->{snippet}->[0] += $file_offset - $j->{snippet}->[0];
                 $j->{snippet}->[1] -= $file_offset - $j->{snippet}->[0];
@@ -135,12 +199,32 @@ sub search {
     $redis_other->rpush("queue:cpangrep:slabsearch", encode_json({
         slablist => $slab,
         slabs => \@slabs,
-        re => "" . $self->re,
+        re => "" . $self->_re,
         notify => $notify
       }));
   }
 
-  return results => \@results, $other_cv->recv;
+  my @finish = $other_cv->recv;
+  return results => $self->filter_results(\@results), @finish;
+}
+
+sub filter_results {
+  my($self, $results) = @_;
+  my @results = @$results;
+
+  for my $option(@{$self->_options}) {
+    # This could probably be optimised a lot, but take the lazy approach for now.
+    my $predicate = 
+      $option->{type} eq 'file'   ? sub { $_->{file}->{file} =~ $option->{re} } :
+      $option->{type} eq 'dist'   ? sub { $_->{file}->{dist} =~ $option->{re} } :
+      $option->{type} eq 'author' ? sub { $_->{file}->{dist} =~ $option->{re} } :
+      die "Unkown type";
+    my $matcher = $predicate;
+    $matcher = sub { !$predicate->() } if $option->{negate};
+    @results = grep $matcher->(), @results;
+  }
+
+  return \@results;
 }
 
 1;

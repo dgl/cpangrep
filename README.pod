@@ -15,7 +15,7 @@ For a very quick development setup you should be able to:
 
 =over 4
 
-=item * Ensure you have Perl 5.10 or later
+=item * Ensure you have Perl 5.14 or later
 
 =item * Install redis
 
