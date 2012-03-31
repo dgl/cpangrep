@@ -21,10 +21,10 @@ my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config
 
 sub dispatch_request {
   sub (GET + /api) {
-    sub (?q=&limit~&exclude_file~) {
-      my($self, $q, $limit, $exclude_file) = @_;
+    sub (?q=&limit~) {
+      my($self, $q, $limit) = @_;
       $limit ||= 100;
-      my $r = $self->_search($q, $exclude_file);
+      my $r = $self->_search($q);
 
       return [ 200, ['Content-type' => 'application/json' ],
                [ encode_json({
@@ -41,10 +41,10 @@ sub dispatch_request {
         [ blessed $_[0] && $_[0]->can("to_html") ? $_[0]->to_html : $_[0] ]];
     }
   },
-  sub (/ + ?q=&page~&exclude_file~) {
-    my($self, $q, $page_number, $exclude_file) = @_;
+  sub (/ + ?q=&page~) {
+    my($self, $q, $page_number) = @_;
 
-    my $r = $self->_search($q, $exclude_file);
+    my $r = $self->_search($q);
     # XXX: Urgh, stop abusing render_response for everything like this...
     if(ref $r eq 'HASH') {
       return render_response($q, $r->{results}, "", $r->{duration}, $page_number);
@@ -61,7 +61,7 @@ sub dispatch_request {
 };
 
 sub _search {
-  my($self, $q, $exclude_file) = @_;
+  my($self, $q) = @_;
 
   my $search = eval { WWW::CPANGrep::Search->new(q => $q) };
   return $@ unless $search;
@@ -85,11 +85,6 @@ sub _search {
       $results = $res{results};
     }
   }
-
-  #if($exclude_file) {
-  #  $exclude_file = re_compiler($exclude_file);
-  #  $results = [grep $_->{file}->{file} !~ $exclude_file, @{$results}];
-  #}
 
   my $duration = AE::time - $start;
   printf "Took %0.2f %s\n", $duration, $cache ? "(cached)" : "";
