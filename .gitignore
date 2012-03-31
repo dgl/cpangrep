@@ -6,4 +6,4 @@ Makefile.old
 .*.sw[op]
 blib
 pm_to_blib
-*.tar.gz
+WWW-CPANGrep-*.tar.gz
