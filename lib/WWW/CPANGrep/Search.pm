@@ -55,18 +55,8 @@ sub search {
   my $slab = $config->{"key.slabs"};
   my $len = $redis->llen($slab)->recv;
   my $req = $config->{"matcher.concurrency"};
-  my $c = int $len/$req;
+  $req = $len if $len < $req;
   my $notify = "webfe1." . $$ . "." . ++$counter;
-  for(1 .. $req) {
-    my @slabs = ($c*($_-1), $_ eq $req ? $len : ($c*$_)-1);
-    $req = $_, last unless @slabs;
-    $redis->rpush("queue:cpangrep:slabsearch", encode_json({
-        slablist => $slab,
-        slabs => \@slabs,
-        re => "" . $self->re,
-        notify => $notify
-      }));
-  }
 
   my $redis_other = AnyEvent::Redis->new(host => $config->{"server.slab"});
   # cv used to manage lifetime of subscription and zrevrangebyscore results.
@@ -76,8 +66,6 @@ sub search {
   $redis->subscribe($notify, sub {
       my($text) = @_;
       $count++;
-      use Data::Dump qw(pp dump);
-      print "Got $count results...\n" if 0 == $count % 200;
       return if not $text;
       my $j = decode_json($text);
 
@@ -91,7 +79,7 @@ sub search {
         $req-- if $j->{done};
         if(!$req) { 
           $redis->unsubscribe($notify);
-        $other_cv->end; # don't want to wait for unsubscribe to happen, hence this other CV..
+          $other_cv->end; # don't want to wait for unsubscribe to happen, hence this other CV..
         }
       } elsif(ref $j eq 'HASH' && $j->{error}) {
         $other_cv->send(error => $j->{error});
@@ -107,7 +95,6 @@ sub search {
               my($file, $file_offset) = @$file_info;
               $j->{file} = decode_json $file;
               if($j->{match}->[0] < $file_offset || $j->{match}->[1] > $file_offset + $j->{file}->{size}) {
-                #print "Match outside range!", dump($j);
                 $other_cv->end;
                 return;
               }
@@ -137,6 +124,17 @@ sub search {
         }
       }
     });
+
+  my $c = int $len/$req;
+  for(1 .. $req) {
+    my @slabs = ($c*($_-1), $_ eq $req ? $len : ($c*$_)-1);
+    $redis_other->rpush("queue:cpangrep:slabsearch", encode_json({
+        slablist => $slab,
+        slabs => \@slabs,
+        re => "" . $self->re,
+        notify => $notify
+      }));
+  }
 
   return results => \@results, $other_cv->recv;
 }
