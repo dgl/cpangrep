@@ -1,20 +1,16 @@
 # -*- mode: org -*-
 
 * Why is something leaking Redis clients (part of the Search.pm refactor maybe?)
+* Handle overlapping bits
+* Charset guessing?
 
 * Consistent use of config
-* Caching (at least for basic paging to avoid searches all the time)
 
 * Stop using Tie::Redis in such a stupid/insane way
 * Consider using 0MQ or something other than Redis for queueing
 * Tests
 ** Make unit testable
 ** Using fakecpan for end to end type tests
-* Complex search
-** dist:...
-   searching a specific dist
-   searching all dists matching something
-** author:..?
 * Cleanup about page
 * Line numbering
 * Abstract when hovering over a dist name
@@ -22,6 +18,6 @@
 * File displaying / syntax hilighting
 * De-dupe
 ** Matches in same file
-** File level (MD5?)
+** File level (SHA1?)
 ** Too many matches in distro (more...)
 * API
