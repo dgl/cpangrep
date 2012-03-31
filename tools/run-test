@@ -8,5 +8,5 @@ if ! pgrep redis-server; then
   sleep .2
 fi
 
-bin/cpangrep-matcher&
-exec starman app.psgi
+perl bin/cpangrep-matcher&
+exec perl `which starman` app.psgi
