@@ -3,17 +3,16 @@ use v5.10;
 use Web::Simple 'WWW::CPANGrep';
 
 package WWW::CPANGrep;
-use JSON;
-use POSIX qw(ceil);
 use AnyEvent::Redis;
-use Try::Tiny;
-use HTML::Entities;
-use URI::Escape qw(uri_escape_utf8);
-use Data::Pageset::Render;
-use HTML::Zoom;
 use Config::GitLike;
+use Data::Pageset::Render;
+use HTML::Entities;
+use HTML::Zoom;
+use JSON;
 use Scalar::Util qw(blessed);
-require re::engine::RE2;
+use URI::Escape qw(uri_escape_utf8);
+
+use WWW::CPANGrep::Search;
 
 use constant TMPL_PATH => "share/html";
 use constant MAX => 1_000;
@@ -31,7 +30,7 @@ sub dispatch_request {
                [ encode_json({
                    count => scalar @{$r->{results}},
                    duration => $r->{duration},
-                   results => [@{$r->{results}}[0 .. $limit]]
+                   results => [grep defined, @{$r->{results}}[0 .. $limit]]
                  })]
              ];
     }
@@ -42,7 +41,17 @@ sub dispatch_request {
         [ blessed $_[0] && $_[0]->can("to_html") ? $_[0]->to_html : $_[0] ]];
     }
   },
-  \&search,
+  sub (/ + ?q=&page~&exclude_file~) {
+    my($self, $q, $page_number, $exclude_file) = @_;
+
+    my $r = $self->_search($q, $exclude_file);
+    # XXX: Urgh, stop abusing render_response for everything like this...
+    if(ref $r eq 'HASH') {
+      return render_response($q, $r->{results}, "", $r->{duration}, $page_number);
+    } else {
+      return render_response($q, undef, $r, undef);
+    }
+  },
   sub (/about) {
     HTML::Zoom->from_file(TMPL_PATH . "/about.html")
   },
@@ -51,36 +60,13 @@ sub dispatch_request {
   },
 };
 
-sub search(/ + ?q=&page~&exclude_file~) {
-  my($self, $q, $page_number, $exclude_file) = @_;
-
-  my $r = $self->_search($q, $exclude_file);
-  if(ref $r eq 'HASH') {
-    return render_response($q, $r->{results}, "", $r->{duration}, $page_number);
-  } else {
-    return render_response($q, undef, $r, undef, $page_number);
-  }
-}
-
 sub _search {
   my($self, $q, $exclude_file) = @_;
 
+  my $search = eval { WWW::CPANGrep::Search->new(q => $q) };
+  return $@ unless $search;
+
   my $redis = AnyEvent::Redis->new(host => $config->{"server.queue"});
-
-  my $re = eval { re_compiler($q) };
-
-  if(!$q || !$re) {
-    return "Sorry, I can't make sense of that. $@";
-  }
-  if(!$re->isa("re::engine::RE2")) {
-    return "Please don't use lookbehind or anything else RE2 doesn't understand!";
-
-  } elsif("abcdefgh" x 20 =~ $re || $q =~ /^.$/) {
-    # RE2 is quite happy with most things you throw at it, but really doesn't
-    # like lots of long matches, this is just a lame check.
-    return "Please don't be that greedy with your matching";
-  }
-
   my $start = AE::time;
 
   my $results;
@@ -89,7 +75,7 @@ sub _search {
   if($cache) {
     $results = decode_json($cache);
   } else {
-    my %res = do_search($redis, $q);
+    my %res = $search->search($redis);
     if($res{error}) {
       $response = "Something went wrong! $res{error}";
       return $response;
@@ -100,114 +86,15 @@ sub _search {
     }
   }
 
-  if($exclude_file) {
-    $exclude_file = re_compiler($exclude_file);
-    $results = [grep $_->{file}->{file} !~ $exclude_file, @{$results}];
-  }
+  #if($exclude_file) {
+  #  $exclude_file = re_compiler($exclude_file);
+  #  $results = [grep $_->{file}->{file} !~ $exclude_file, @{$results}];
+  #}
 
   my $duration = AE::time - $start;
   printf "Took %0.2f %s\n", $duration, $cache ? "(cached)" : "";
 
   return { results => $results, duration => $duration };
-}
-
-sub re_compiler {
-  use re::engine::RE2;
-  eval(q{ sub { qr/$_[0]/ } })->(shift);
-}
-
-sub do_search {
-  my($redis, $q) = @_;
-  state $counter = 0;
-
-  my @results;
-  my $slab = $config->{"key.slabs"};
-  my $len = $redis->llen($slab)->recv;
-  my $req = $config->{"matcher.concurrency"};
-  my $c = int $len/$req;
-  my $notify = "webfe1." . $$ . "." . ++$counter;
-  for(1 .. $req) {
-    my @slabs = ($c*($_-1), $_ eq $req ? $len : ($c*$_)-1);
-    $req = $_, last unless @slabs;
-    $redis->rpush("queue:cpangrep:slabsearch", encode_json({
-        slablist => $slab,
-        slabs => \@slabs,
-        re => $q,
-        notify => $notify
-      }));
-  }
-
-  my $redis_other = AnyEvent::Redis->new(host => $config->{"server.slab"});
-  # cv used to manage lifetime of subscription and zrevrangebyscore results.
-  my $other_cv = AE::cv;
-  $other_cv->begin;
-  my $count = 0;
-  $redis->subscribe($notify, sub {
-      my($text) = @_;
-      $count++;
-      use Data::Dump qw(pp dump);
-      print "Got $count results...\n" if 0 == $count % 200;
-      return if not $text;
-      my $j = decode_json($text);
-
-      if($count > MAX) {
-        # quite enough, thanks
-        $redis->unsubscribe($notify);
-        $other_cv->end; # don't want to wait for unsubscribe to happen, hence this other CV..
-      }
-
-      if(ref $j eq 'HASH' && $j->{done}) {
-        $req-- if $j->{done};
-        if(!$req) { 
-          $redis->unsubscribe($notify);
-        $other_cv->end; # don't want to wait for unsubscribe to happen, hence this other CV..
-        }
-      } elsif(ref $j eq 'HASH' && $j->{error}) {
-        $other_cv->send(error => $j->{error});
-      } else {
-        eval {
-          my $j = $_;
-          # Note the ending offset of the match is used here, we want to see
-          # where the end of the match was, just incase it went over two files
-          # which shouldn't actually be shown to the user.
-          $redis_other->zrevrangebyscore($j->{zset}, $j->{match}->[1], "-inf",
-            "withscores", "limit", 0, 1, sub {
-              my($file_info) = @_;
-              my($file, $file_offset) = @$file_info;
-              $j->{file} = decode_json $file;
-              if($j->{match}->[0] < $file_offset || $j->{match}->[1] > $file_offset + $j->{file}->{size}) {
-                #print "Match outside range!", dump($j);
-                $other_cv->end;
-                return;
-              }
-              # Clean this up.
-              if($j->{snippet}->[0] < $file_offset) {
-                $j->{text} = eval { substr $j->{text}, $j->{snippet}->[0] };
-                $j->{snippet}->[0] -= $file_offset - $j->{snippet}->[0];
-              }
-              if($j->{snippet}->[1] > ($file_offset + $j->{file}->{size})) {
-                $j->{text} = eval { substr $j->{text}, 0, $j->{snippet}->[1] -
-                  ($file_offset + $j->{file}->{size}) };
-                $j->{snippet}->[1] -= $file_offset + $j->{file}->{size};
-              }
-
-              # Finally normalise the match so it's an offset within the
-              # snippet
-              $j->{match}->[0] -= $j->{snippet}->[0];
-              $j->{match}->[1] -= $j->{snippet}->[0];
-
-              push @results, $j;
-              $other_cv->end;
-            });
-          $other_cv->begin;
-        } for @$j;
-        if($@) {
-          warn $@;
-        }
-      }
-    });
-
-  return results => \@results, $other_cv->recv;
 }
 
 sub render_response {
@@ -258,6 +145,7 @@ sub render_response {
 
           $_->select('.file-link')->replace_content($file)
           ->then
+          # TODO: Use metacpan here.
           ->set_attribute(href => "http://cpansearch.perl.org/src/$author/$file")
           ->select('.dist-link')->replace_content("$author/$package")
           ->then
