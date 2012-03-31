@@ -96,6 +96,17 @@ sub _search {
 sub render_response {
   my($q, $results, $error, $duration, $page_number, $count) = @_;
 
+  my $output = HTML::Zoom->from_file(TMPL_PATH . "/results.html")
+    ->select('title')->replace_content("$q · CPAN->grep")
+    ->select('input[name="q"]')->add_to_attribute(value => $q);
+
+  if($error || !@$results) {
+    return $output
+      ->select('.divider')->replace_content(" ")
+      ->select('.result')->replace_content($error || "No matches found.")
+      ->select('.pagination')->replace("");
+  }
+
   my $pager = Data::Pageset::Render->new({
       total_entries    => $results ? scalar @$results : 0,
       entries_per_page => 25,
@@ -105,66 +116,56 @@ sub render_response {
       link_format      => '<a href="?q=' . encode_entities(uri_escape_utf8($q)) . '&amp;page=%p">%a</a>'
     });
 
-  my $output = HTML::Zoom->from_file(TMPL_PATH . "/results.html")
-    ->select('title')->replace_content("$q · CPAN->grep")
+  $output = $output
+    ->select('#time')->replace_content(sprintf "%0.2f", $duration)
     ->select('#total')->replace_content($count > MAX ? "more than " . MAX : $count)
-    ->select('#time')->replace_content(sprintf "%0.2f", $duration || 0)
     ->select('#start-at')->replace_content($pager->first)
-    ->select('#end-at')->replace_content($pager->last)
-    ->select('input[name="q"]')->add_to_attribute(value => $q);
+    ->select('#end-at')->replace_content($pager->last);
 
-  if($error || !@$results) {
-    $output = $output->select('.divider')->replace_content(" ")
-      ->select('.result')->replace_content($error || "No matches found.")
-      ->select('.pagination')->replace("");
-  } else {
-    $output = $output->select('.results')->repeat_content(
-      [ map {
-        my $result = $_;
-        sub {
-          my($package) = $result->{dist} =~ m{([^/]+)$};
-          $package =~ s/\.(?:tar\.gz|zip|tar\.bz2)$//;
-          my $author = ($result->{dist} =~ m{^([^/]+)})[0];
+  $output = $output->select('.results')->repeat_content(
+    [ map {
+      my $result = $_;
+      sub {
+        my($package) = $result->{dist} =~ m{([^/]+)$};
+        $package =~ s/\.(?:tar\.gz|zip|tar\.bz2)$//;
+        my $author = ($result->{dist} =~ m{^([^/]+)})[0];
 
-          $_ = $_->select('.files')->repeat_content([map {
-            my $file = $_;
-            sub {
-              $_ = $_->select('.excerpts')->repeat_content([map {
-                my $excerpt = $_;
-                sub {
-                  # XXX: Find some better code for this.
-                  my $html = eval { my $html = "";
-                    $html .= encode_entities(substr $excerpt->{text}, 0, $excerpt->{match}->[0]) if $excerpt->{match}->[0];
-                    $html .= "<strong>";
-                    $html .= encode_entities(substr $excerpt->{text}, $excerpt->{match}->[0], $excerpt->{match}->[1] - $excerpt->{match}->[0]);
-                    $html .= "</strong>";
-                    $html .= encode_entities(substr $excerpt->{text}, $excerpt->{match}->[1]);
-                    $html;
-                  } or do print "$@";
-                  $html ||= "";
-                  $_->select('.excerpt')->replace_content(\$html);
-                }
-              } @{$file->{results}}]);
+        $_ = $_->select('.files')->repeat_content([map {
+          my $file = $_;
+          sub {
+            $_ = $_->select('.excerpts')->repeat_content([map {
+              my $excerpt = $_;
+              sub {
+                # XXX: Find some better code for this.
+                my $html = eval { my $html = "";
+                  $html .= encode_entities(substr $excerpt->{text}, 0, $excerpt->{match}->[0]) if $excerpt->{match}->[0];
+                  $html .= "<strong>";
+                  $html .= encode_entities(substr $excerpt->{text}, $excerpt->{match}->[0], $excerpt->{match}->[1] - $excerpt->{match}->[0]);
+                  $html .= "</strong>";
+                  $html .= encode_entities(substr $excerpt->{text}, $excerpt->{match}->[1]);
+                  $html;
+                } or do print "$@";
+                $html ||= "";
+                $_->select('.excerpt')->replace_content(\$html);
+              }
+            } @{$file->{results}}]);
 
-              my $filename = "$package/$file->{file}";
-              $_->select('.file-link')->replace_content($filename)
-                ->then
-                # TODO: Use metacpan here.
-                ->set_attribute(href => "http://cpansearch.perl.org/src/$author/$filename");
-            }
-          } @{$result->{files}}]);
+            my $filename = "$package/$file->{file}";
+            $_->select('.file-link')->replace_content($filename)
+              ->then
+              # TODO: Use metacpan here.
+              ->set_attribute(href => "http://cpansearch.perl.org/src/$author/$filename");
+          }
+        } @{$result->{files}}]);
 
-          $_->select('.dist-link')->replace_content("$author/$package")
-            ->then
-            # TODO: Use metacpan here.
-            ->set_attribute(href => "http://search.cpan.org/~" . lc($author) . "/$package/");
-        }
-      } @$results[$pager->first - 1 .. $pager->last - 1]]);
+        $_->select('.dist-link')->replace_content("$author/$package")
+          ->then
+          # TODO: Use metacpan here.
+          ->set_attribute(href => "http://search.cpan.org/~" . lc($author) . "/$package/");
+      }
+    } @$results[$pager->first - 1 .. $pager->last - 1]]);
 
-    $output = $output->select('.pagination')->replace_content(\$pager->html);
-  }
-
-  return $output;
+  return $output->select('.pagination')->replace_content(\$pager->html);
 }
 
 WWW::CPANGrep->run_if_script;
