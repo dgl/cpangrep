@@ -72,7 +72,7 @@ sub _search {
   my $results;
   my $response;
   my $cache = $redis->get("querycache:" . uri_escape_utf8($q))->recv;
-  if($cache) {
+  if(!$ENV{DEBUG} && $cache) {
     $results = decode_json($cache);
   } else {
     my %res = $search->search($redis);

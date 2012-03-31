@@ -98,15 +98,19 @@ sub search {
                 $other_cv->end;
                 return;
               }
-              # Clean this up.
+              # XXX: Clean this up.
               if($j->{snippet}->[0] < $file_offset) {
-                $j->{text} = eval { substr $j->{text}, $j->{snippet}->[0] };
-                $j->{snippet}->[0] -= $file_offset - $j->{snippet}->[0];
+                print "($j->{snippet}->[0] < $file_offset)\n";
+                $j->{text} = substr $j->{text}, $file_offset - $j->{snippet}->[0];
+                $j->{snippet}->[0] += $file_offset - $j->{snippet}->[0];
+                $j->{snippet}->[1] -= $file_offset - $j->{snippet}->[0];
               }
               if($j->{snippet}->[1] > ($file_offset + $j->{file}->{size})) {
-                $j->{text} = eval { substr $j->{text}, 0, $j->{snippet}->[1] -
-                  ($file_offset + $j->{file}->{size}) };
-                $j->{snippet}->[1] -= $file_offset + $j->{file}->{size};
+                # XXX: logic messed up
+                my $removed = length($j->{text}) - ($file_offset + $j->{file}->{size});
+                $j->{text} = substr $j->{text}, 0, $j->{snippet}->[1] -
+                  ($file_offset + $j->{file}->{size});
+                $j->{snippet}->[1] -= $removed;
               }
 
               # Finally normalise the match so it's an offset within the

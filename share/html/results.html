@@ -11,9 +11,19 @@
 	<link rel="icon" type="image/png" href="/favicon.png" />
 	<link rel="stylesheet" type="text/css" media="screen, projection" href="//dg.cx/cpangrep/cpangrep.css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script>
+          $(document).ready(function() {
+            $(document).bind("keypress", function(e) {
+              if(e.srcElement == $(".q")[0]) return;
+
+              switch(String.fromCharCode(e.charCode)) {
+                case '/': $(".q").focus(); e.preventDefault(); break;
+              }
+            });
+          });
+        </script>
 </head>
 <body>
-
 	<div class="header">
 
 		<a href="/"><img src="//dg.cx/cpangrep/magnify80.png" alt="CPAN->GREP" class="magnify" /></a>
@@ -55,10 +65,6 @@
 <div class="divfooter">
 <a href="/">Home</a> &middot; <a href="/about">About</a> <!-- &middot; <a href="/statistics">Stats</a> -->
 </div>
-
-
-
-
 
 </body>
 
