@@ -143,15 +143,13 @@ sub render_response {
             my $filename = "$package/$file->{file}";
             $_->select('.file-link')->replace_content($filename)
               ->then
-              # TODO: Use metacpan here.
-              ->set_attribute(href => "http://cpansearch.perl.org/src/$author/$filename");
+              ->set_attribute(href => "https://metacpan.org/source/$author/$filename#L1");
           }
         } @{$result->{files}}]);
 
         $_->select('.dist-link')->replace_content("$author/$package")
           ->then
-          # TODO: Use metacpan here.
-          ->set_attribute(href => "http://search.cpan.org/~" . lc($author) . "/$package/");
+          ->set_attribute(href => "https://metacpan.org/release/$author/$package");
       }
     } @$results[$pager->first - 1 .. $pager->last - 1]]);
 
