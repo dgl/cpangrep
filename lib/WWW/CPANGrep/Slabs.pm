@@ -38,11 +38,11 @@ has name => (
 );
 
 sub index {
-  my($self, $dist, $file, $content) = @_;
+  my($self, $dist, $distname, $file, $content) = @_;
 
   $self->_rotate_slab if $self->_slab->full;
 
-  $self->_slab->index($dist, $file, $content);
+  $self->_slab->index($dist, $distname, $file, $content);
 }
 
 sub finish {
@@ -56,11 +56,6 @@ sub finish {
   push @{$self->redis->{$self->name}}, $self->_slab->name;
 
   for my $dist(keys %{$self->_slab->seen_dists}) {
-    my($author, $dist) = split m{/}, $dist, 2;
-
-    $self->redis->{"cpangrep:author:$author"} ||= [];
-    push @{$self->redis->{"cpangrep:author:$author"}}, $dist;
-
     $r->hset("cpangrep:dists", $dist, $self->_slab->name);
   }
 

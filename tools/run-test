@@ -1,10 +1,13 @@
 #!/bin/sh
 # Hacky script for testing purposes
+export DEBUG=1
+
 pkill -f bin/cpangrep-matcher
 pkill -f bin/cpangrep-index
 
+started_redis=0
 if ! pgrep redis-server; then
-  STARTED_REDIS=1
+  started_redis=1
   (cd var; redis-server)&
   sleep .2
 fi
@@ -16,5 +19,5 @@ if [ "var/slabs/*" = "$(echo var/slabs/*)" ]; then
 fi
 
 perl bin/cpangrep-matcher&
-trap 'if [ "$STARTED_REDIS" -gt 0 ]; then killall redis-server; wait; fi' INT
-starman -R -E development app.psgi
+trap 'if [ "$started_redis" -gt 0 ]; then killall redis-server; wait; fi' INT
+starman -R app.psgi

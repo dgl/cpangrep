@@ -2,7 +2,6 @@ package WWW::CPANGrep::Search;
 use 5.014;
 use AnyEvent;
 use Config::GitLike;
-use CPAN::DistnameInfo;
 use JSON;
 use Moo;
 use Scalar::Util qw(blessed);
@@ -230,9 +229,7 @@ sub _find_slabs {
 
   for my $option(values $self->_options) {
     if(!$option->{negate}) {
-      if($option->{type} eq 'author') {
-        # TODO
-      } elsif($option->{type} eq 'dist') {
+      if($option->{type} eq 'dist') {
         $slabs = set(map $dist_slab_map->{$_}, grep $_ =~ $option->{re}, keys
           $dist_slab_map)->intersection($slabs);
       }
@@ -249,7 +246,7 @@ sub filter_results {
   for my $option(@{$self->_options}) {
     my $predicate = 
       $option->{type} eq 'file'   ? sub { $_->{file}->{file} =~ $option->{re} } :
-      $option->{type} eq 'dist'   ? sub { CPAN::DistnameInfo->new($_->{file}->{dist})->dist =~ $option->{re} } :
+      $option->{type} eq 'dist'   ? sub { $_->{file}->{distname} =~ $option->{re} } :
       $option->{type} eq 'author' ? sub { (split m{/}, $_->{file}->{dist}, 2)[0] =~ $option->{re} } :
       die "Unkown type";
     my $matcher = $predicate;

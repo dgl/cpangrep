@@ -67,7 +67,7 @@ sub BUILDARGS {
 }
 
 sub index {
-  my($self, $dist, $file, $content) = @_;
+  my($self, $dist, $distname, $file, $content) = @_;
 
   if($$content =~ /^.*\0/) { # first line contains NUL => probably binary
     warn "Ignoring probable binary file $file (in $dist)";
@@ -77,12 +77,13 @@ sub index {
   print {$self->_fh} $$content, SLAB_SEPERATOR;
 
   $self->redis->zadd($self->name, $self->_size, encode_json {
-      size => length($$content),
-      dist => $dist,
-      file => $file
+      size     => length($$content),
+      dist     => $dist,
+      distname => $distname,
+      file     => $file
   });
 
-  $self->{seen_dists}{$dist}++;
+  $self->{seen_dists}{$distname}++;
 
   $self->_size($self->_size + length($$content) + length SLAB_SEPERATOR);
 }

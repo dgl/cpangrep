@@ -4,6 +4,7 @@ use namespace::autoclean;
 
 use JSON;
 use Archive::Peek::Libarchive;
+use CPAN::DistnameInfo;
 use File::MMagic::XS;
 use WWW::CPANGrep::Slabs;
 use File::Basename qw(dirname);
@@ -83,19 +84,21 @@ sub index_dist{
   print "Processing $dist\n";
 
   eval {
+    my $cpan_dist = CPAN::DistnameInfo->new($prefix);
+
     Archive::Peek::Libarchive->new(
       filename => $self->cpan_dir . "/authors/id/$prefix"
     )->iterate(
       sub {
-        my $file = $_[0];
+        my $file = $_[0] =~ s{^\Q@{[$cpan_dist->distvname]}\E/}{}r;
         my $content = \$_[1];
-        next if $file eq 'MANIFEST';
+        return if $file eq 'MANIFEST';
 
         my $mime_type = $self->_mmagic->bufmagic($$content);
         if($mime_type !~ /^text/) {
           warn "Ignoring binary file $file ($mime_type, in $dist)\n";
         } else {
-          $self->_slab->index($dist, $file, $content);
+          $self->_slab->index($dist, $cpan_dist->dist, $file, $content);
         }
       }
     );
