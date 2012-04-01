@@ -21,6 +21,7 @@ my %opts = (
     'IO::AIO' => 0,
     'CPAN::DistnameInfo' => 0,
     'Starman' => 0,
+    'Set::Object' => 0,
   }
 );
 

@@ -5,9 +5,11 @@ use Config::GitLike;
 use CPAN::DistnameInfo;
 use JSON;
 use Moo;
-require re::engine::RE2;
 use Scalar::Util qw(blessed);
+use Set::Object qw(set);
 use Text::Balanced qw(gen_delimited_pat);
+
+require re::engine::RE2;
 
 # TODO: stick in a module or something
 my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config");
@@ -86,7 +88,7 @@ sub _parse_search {
 
 sub _re2_compiler {
   use re::engine::RE2 -strict => 1;
-  qr/$_[0]/;
+  qr/$_[0]/m;
 }
 
 sub _re2_compile {
@@ -123,10 +125,9 @@ sub search {
   state $counter = 0;
 
   my @results;
-  my $slab = $config->{"key.slabs"};
-  my $len = $redis->llen($slab)->recv;
+  my @slabs = $self->_find_slabs($redis);
   my $req = $config->{"matcher.concurrency"};
-  $req = $len if $len < $req;
+  $req = @slabs if @slabs < $req;
   my $notify = "webfe1." . $$ . "." . ++$counter;
 
   my $redis_other = AnyEvent::Redis->new(host => $config->{"server.slab"});
@@ -199,19 +200,45 @@ sub search {
       }
     });
 
-  my $c = int $len/$req;
-  for(1 .. $req) {
-    my @slabs = ($c*($_-1), $_ eq $req ? $len : ($c*$_)-1);
-    $redis_other->rpush("queue:cpangrep:slabsearch", encode_json({
-        slablist => $slab,
-        slabs => \@slabs,
-        re => "" . $self->_re,
-        notify => $notify
-      }));
+  if(@slabs) {
+    my $c = int @slabs/$req;
+    for(1 .. $req) {
+      $redis_other->rpush("queue:cpangrep:slabsearch", encode_json({
+          slablist => $config->{"key.slabs"},
+          slabs => [@slabs[$c*($_-1) .. ($_ eq $req ? @slabs - 1 : ($c*$_) - 1)]],
+          re => "" . $self->_re,
+          notify => $notify,
+          # TODO: tune this
+          max => 10_000 * (1 / log 1 + @slabs)
+        }));
+    }
   }
 
-  my @finish = $other_cv->recv;
+  my @finish = @slabs ? $other_cv->recv : ();
   return $self->filter_results(\@results), @finish;
+}
+
+sub _find_slabs {
+  my($self, $redis) = @_;
+  # XXX: This is pretty small with a small number of web workers, but can do
+  # better (make the matcher more intelligent?)
+  state $dist_slab_map = { @{$redis->hgetall("cpangrep:dists")->recv} };
+  state $all_slabs = $redis->lrange($config->{"key.slabs"}, 0, -1)->recv;
+  state $slab_id_map = { map +($all_slabs->[$_] => $_), 0 .. $#$all_slabs };
+
+  my $slabs = set(@$all_slabs);
+
+  for my $option(values $self->_options) {
+    if(!$option->{negate}) {
+      if($option->{type} eq 'author') {
+        # TODO
+      } elsif($option->{type} eq 'dist') {
+        $slabs = set(map $dist_slab_map->{$_}, grep $_ =~ $option->{re}, keys
+          $dist_slab_map)->intersection($slabs);
+      }
+    }
+  }
+  sort { $a <=> $b } map $slab_id_map->{$_}, $slabs->members;
 }
 
 # This could probably be optimised a lot, but take the lazy approach for now.

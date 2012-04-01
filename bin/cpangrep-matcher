@@ -56,7 +56,7 @@ sub do_match {
     }
 
     my @results;
-    while($pm =~ /$re/g) {
+    while($pm =~ /$re/gm) {
       if($+[0] - $-[0] > 1e5) {
 	 $redis->publish($channel => encode_json {
 	     error => "Regexp is too greedy"
@@ -100,8 +100,8 @@ while(1) {
     last unless $item->[0];
     print "$$: processing job: $item->[1]\n";
     my $job = decode_json $item->[1];
-    my $slabs = [@{$redis->lrange($job->{slablist}, @{$job->{slabs}})->recv}];
-    my $max = 500;
+    my $slabs = [map $redis->lindex($job->{slablist}, $_)->recv, @{$job->{slabs}}];
+    my $max = $job->{max} || 500;
     my $start = time;
     do_match($job->{re}, $max, $job->{notify}, $slabs);
     $redis->publish($job->{notify} => encode_json {
