@@ -3,7 +3,7 @@ use Moose;
 use namespace::autoclean;
 
 use JSON;
-use CPAN::Visitor;
+use Archive::Peek::Libarchive;
 use File::MMagic::XS;
 use WWW::CPANGrep::Slabs;
 use File::Basename qw(dirname);
@@ -65,16 +65,9 @@ sub run {
   my $redis_conn = (tied %{$self->redis})->{_conn};
   $redis_conn->incr("cpangrep:indexer");
 
-  while(my $dist = pop @{$self->redis->{$queue}}) {
-    print "Processing $dist\n";
-
-    CPAN::Visitor->new(
-      cpan => $self->cpan_dir,
-      files => [$dist]
-    )->iterate(
-      visit => sub { $self->index_dist($dist, @_) },
-      jobs => 0,
-    );
+  while(my $item = pop @{$self->redis->{$queue}}) {
+    my($dist, $prefix) = @{decode_json $item}{qw(dist prefix)};
+    $self->index_dist($dist, $prefix);
   }
 
   my $name = $self->_slab->finish;
@@ -85,31 +78,33 @@ sub run {
   return $redis_conn->decr("cpangrep:indexer") == 0;
 }
 
-sub index_dist {
-  my($self, $dist, $cpanv_job) = @_;
-  # We're now in the right directory
+sub index_dist{
+  my($self, $dist, $prefix) = @_;
+  print "Processing $dist\n";
 
-  my @files;
-  File::Find::find {
-    no_chdir => 1,
-    wanted => sub {
-      s{^./}{};
-      push @files, $_ if -f;
-    }
-  }, ".";
+  eval {
+    Archive::Peek::Libarchive->new(
+      filename => $self->cpan_dir . "/authors/id/$prefix"
+    )->iterate(
+      sub {
+        my $file = $_[0];
+        my $content = \$_[1];
+        next if $file eq 'MANIFEST';
 
-  my $redis_conn = (tied %{$self->redis})->{_conn};
+        my $mime_type = $self->_mmagic->bufmagic($$content);
+        if($mime_type !~ /^text/) {
+          warn "Ignoring binary file $file ($mime_type, in $dist)\n";
+        } else {
+          $self->_slab->index($dist, $file, $content);
+        }
+      }
+    );
+  };
 
-  for my $file(@files) {
-    next if $file eq 'MANIFEST';
-    my $mime_type = $self->_mmagic->get_mime($file);
-    $redis_conn->hincrby("mime_stats", $mime_type, 1);
-
-    if($mime_type !~ /^text/) {
-      warn "Ignoring binary file $file ($mime_type, in $dist)\n";
-    } else {
-      $self->_slab->index($dist, $file);
-    }
+  if($@) {
+    warn $@;
+    push @{$self->redis->{index_failures}},
+      encode_json { dist => $dist, error => $@ };
   }
 }
 

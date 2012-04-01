@@ -38,11 +38,11 @@ has name => (
 );
 
 sub index {
-  my($self, $dist, $file) = @_;
+  my($self, $dist, $file, $content) = @_;
 
   $self->_rotate_slab if $self->_slab->full;
 
-  $self->_slab->index($dist, $file);
+  $self->_slab->index($dist, $file, $content);
 }
 
 sub finish {

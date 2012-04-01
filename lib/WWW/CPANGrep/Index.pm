@@ -1,5 +1,6 @@
 package WWW::CPANGrep::Index;
 use Config::GitLike;
+use JSON;
 use Moose;
 use namespace::autoclean;
 use Parse::CPAN::Packages;
@@ -42,8 +43,10 @@ sub index {
     . "/modules/02packages.details.txt.gz");
 
   my $queue = "distlist:queue:" . time;
-  my @queue = map $_->cpanid . "/" . $_->filename,
-        $packages->latest_distributions;
+  my @queue = map encode_json {
+    dist => $_->cpanid . "/" . $_->filename,
+    prefix => $_->prefix,
+  }, $packages->latest_distributions;
 
   $self->redis->{$queue} = \@queue;
   print "Inserted ", scalar(@{$self->redis->{$queue}}), " dists into $queue\n";
