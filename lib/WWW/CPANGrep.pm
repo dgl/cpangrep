@@ -136,17 +136,7 @@ sub render_response {
             $_ = $_->select('.excerpts')->repeat_content([map {
               my $excerpt = $_;
               sub {
-                # XXX: Find some better code for this.
-                my $html = eval { my $html = "";
-                  $html .= encode_entities(substr $excerpt->{text}, 0, $excerpt->{match}->[0]) if $excerpt->{match}->[0];
-                  $html .= "<strong>";
-                  $html .= encode_entities(substr $excerpt->{text}, $excerpt->{match}->[0], $excerpt->{match}->[1] - $excerpt->{match}->[0]);
-                  $html .= "</strong>";
-                  $html .= encode_entities(substr $excerpt->{text}, $excerpt->{match}->[1]);
-                  $html;
-                } or do print "$@";
-                $html ||= "";
-                $_->select('.excerpt')->replace_content(\$html);
+                $_->select('.excerpt')->replace_content(\_render_snippet($excerpt));
               }
             } @{$file->{results}}]);
 
@@ -166,6 +156,20 @@ sub render_response {
     } @$results[$pager->first - 1 .. $pager->last - 1]]);
 
   return $output->select('.pagination')->replace_content(\$pager->html);
+}
+
+sub _render_snippet {
+  my($excerpt) = @_;
+  # XXX: Find some better code for this.
+  my $html = eval { my $html = "";
+    $html .= encode_entities(substr $excerpt->{text}, 0, $excerpt->{match}->[0]) if $excerpt->{match}->[0];
+    $html .= "<strong>";
+    $html .= encode_entities(substr $excerpt->{text}, $excerpt->{match}->[0], $excerpt->{match}->[1] - $excerpt->{match}->[0]);
+    $html .= "</strong>";
+    $html .= encode_entities(substr $excerpt->{text}, $excerpt->{match}->[1]);
+    $html;
+  } or do print "$@";
+  $html ||= "";
 }
 
 WWW::CPANGrep->run_if_script;
