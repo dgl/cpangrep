@@ -24,7 +24,6 @@ You just need a redis-server binary around, C<run-test> below will start it for 
 =item * Run the following:
 
   cpanm --installdeps .
-  bin/cpangrep-index
   tools/run-test
 
 =item * Visit L<http://localhost:5000>

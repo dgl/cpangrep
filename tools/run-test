@@ -1,11 +1,15 @@
 #!/bin/sh
 # Hacky script for testing purposes
-pkill -f cpangrep-matcher
-pkill -f cpangrep-indexer
+pkill -f bin/cpangrep-matcher
+pkill -f bin/cpangrep-indexer
 
 if ! pgrep redis-server; then
   (cd var; redis-server)&
   sleep .2
+fi
+
+if [ -z "$(echo var/slabs/*)" ]; then
+  bin/cpangrep-indexer
 fi
 
 perl bin/cpangrep-matcher&
