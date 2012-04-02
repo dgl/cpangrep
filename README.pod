@@ -3,11 +3,10 @@
 This is the code behind L<http://grep.cpan.me>. Unless you want to add
 something you probably want to use the site, not try and install this ;-)
 
-To index the whole of CPAN takes an hour or two on a good box. For development
-I currently build an index of just part of CPAN (all dists under /id/D/). You
-can do this by C<grep 'D/D./' 02packages.details.txt.gz> and re-adding the
-header. Alternatively the default development configuration will index a sample
-CPAN from L<fakecpan|http://www.fakecpan.org>.
+The default development configuration will index a sample CPAN from
+L<fakecpan|http://www.fakecpan.org>.  Indexing the whole CPAN doesn't take long,
+although you'll need around 4GB of RAM spare to get a decent level of
+performance.
 
 =head2 Quick start
 
