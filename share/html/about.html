@@ -60,7 +60,7 @@
 		<li><a href="/?q=GvCV%5Cs*%5C%28%5B%5E%29%5D%2B%5C%29%5Cs*%3D%5B%5E%3D%5D">GvCV\s*\([^)]+\)\s*=[^=]</a> &mdash; search for assignments to GvCV</a></li>
 		<li><a href="/?q=(?i:this+should+work,+but)">"this should work, but"...</a></li>
 		<li><a href="/?q=%5E%23.*ACHTUNG">^#.*ACHTUNG</a></li>
-		<li><a href="/?q=%5E%3Dhead1+NAME%5B%5Cr%5Cn+%5D%2B.*Foo">Files with a "NAME" POD section with "Foo" on the first line.</a>
+		<li><a href="/?q=%5E%3Dhead1+NAME%5B%5Cr%5Cn+%5D%2B.*Foo\b">Files with a "NAME" POD section with "Foo" on the first line.</a>
                 <li><a href="/?q=file:\.(?i:xs|c(?:c?|pp))$+-dist:^perl$+SVt_REGEXP">XS, C or C++ files not in the perl core that reference SVt_REGEXP</a>
 		</ul>
 		(If you find any more good examples please send them my way.)
