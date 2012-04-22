@@ -6,25 +6,15 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 	<meta http-equiv="imagetoolbar" content="no" />
 	<meta name="description" content="Search code on CPAN using regular expressions." />
-	<meta name="keywords" content="cpan,search,regex,regexp,regular,expressions,reg,exp,ex,re,find,through,within,inside,in" />
-	<meta name="robots" content="all" />
-        <link rel="icon" type="image/png" href="/favicon.png" />
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-        <link rel="stylesheet" type="text/css" media="screen, projection" href="//dg.cx/cpangrep/cpangrep.css" />
-        <style>
-          .footer {
-            position: absolute;
-            top: 90%;
-            width: 98%;
-            text-align: center;
-          }
-        </style>
+	<meta name="keywords"    content="cpan,search,regex,regexp,regular,expressions,reg,exp,ex,re,find,through,within,inside,in" />
+	<meta name="robots"      content="all" />
+	<link rel="icon"       type="image/png"                             href="/favicon.png" />
+	<link rel="stylesheet" type="text/css"                              href="//dg.cx/cpangrep/cpangrep.css"   media="screen, projection" />
+	<link rel="search"     type="application/opensearchdescription+xml" href="//dg.cx/cpangrep/opensearch.xml" title="CPAN->grep" />
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 </head>
-
-<body onload="document.forms[0].q.focus();">
-
+<body id="grep_index" onload="$('INPUT:text:eq(0)').focus();">
 	<div class="search">
-
 		<img src="//dg.cx/cpangrep/logo.png" alt="CPAN->GREP" /> <br />
 		Search code on CPAN
 
@@ -37,12 +27,9 @@
 		</form>
 
 		<div class="footer">
-                  <a href="about">About</a> &mdash; <a href="https://plus.google.com/112646864076593101108/posts">Status/updates on Google+</a><br/>
-                  <small>Index last updated: <span id="lastupdate"></span></small>
+			<a href="about">About</a> &mdash; <a href="https://plus.google.com/112646864076593101108/posts">Status/updates on Google+</a><br/>
+			<small>Index last updated: <span id="lastupdate"></span></small>
 		</div>
-
 	</div>
-
 </body>
-
 </html>

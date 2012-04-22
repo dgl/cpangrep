@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- See http://www.opensearch.org/Specifications/OpenSearch/1.1 -->
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+	<ShortName>CPAN->grep</ShortName>
+	<Description>Grep CPAN with CPAN-&gt;grep</Description>
+	<Developer>David Leadbeater</Developer>
+	<Contact>dgl@dgl.cx</Contact>
+	<Tags>CPAN grep CPANgrep Perl</Tags>
+
+	<Image height="16" width="16" type="image/x-icon">http://grep.cpan.me/favicon.ico</Image>
+	<Image height="16" width="16" type="image/png"   >http://grep.cpan.me/favicon.png</Image>
+	<Image height="64" width="64" type="image/png"   >http://grep.cpan.me/magnify64.png</Image>
+
+	<Query role="example" title="Where are the easter eggs hidden?"                             searchTerms="easter egg"                 />
+	<Query role="example" title='GvCV\s*\([^)]+\)\s*=[^=] — search for assignments to GvCV'     searchTerms='GvCV\s*\([^)]+\)\s*=[^=]'   />
+	<Query role="example" title='"this should work, but"...'                                    searchTerms='(?i:this should work, but)' />
+	<Query role="example" title='^#.*ACHTUNG'                                                   searchTerms='^#.*ACHTUNG'                />
+	<Query role="example" title='Files with a "NAME" POD section with "Foo" on the first line.' searchTerms='^=head1 NAME[\r\n ]+.*Foo'  />
+
+	<InputEncoding>UTF-8</InputEncoding>
+	<OutputEncoding>UTF-8</OutputEncoding>
+	<AdultContent>false</AdultContent>
+	<Language>*</Language>
+	<SyndicationRight>open</SyndicationRight>
+
+	<Url type="text/html"                             rel="results" template="http://grep.cpan.me/?q={searchTerms}&amp;page={startPage?}&amp;limit={count?}" />
+	<Url type="application/opensearchdescription+xml" rel="self"    template="http://grep.cpan.me/opensearch.xml"                                            />
+</OpenSearchDescription>
