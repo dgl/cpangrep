@@ -56,16 +56,24 @@ sub do_match {
     }
 
     my @results;
+    my ($linenum, $offset) = (1, 0);
     while($pm =~ /$re/gm) {
       if($+[0] - $-[0] > 1e5) {
-	 $redis->publish($channel => encode_json {
-	     error => "Regexp is too greedy"
+         $redis->publish($channel => encode_json {
+           error => "Regexp is too greedy"
          });
          return;
-      } 
+      }
+      
+      # Calculate line number
+      my $pos = pos($pm);
+      my $fragment = substr($pm, $offset, $pos);
+      $linenum++ while ($fragment =~ /\n/g);
+      $offset = $pos;
 
       # XXX: A bit broken in edge cases.
       # Be careful not to use regexps!
+      # XXX: may be able to leverage pos() to use regexps
       my $previous = rindex($pm, "\n", $-[0]);
       $previous = 1+rindex($pm, "\n", $previous-1) if $previous > 0;
       my $next = index($pm, "\n", $+[0]);
@@ -73,15 +81,16 @@ sub do_match {
 
       # Limit length of snippet, 200 bytes should be enough for anyone
       if($next > $previous + 200) {
-	$previous = $previous < $-[0] - 100 ? $-[0] - 100 : $previous;
-	$next = $next > $+[0] + 100 ? $+[0] + 100 : $next;
+        $previous = $previous < $-[0] - 100 ? $-[0] - 100 : $previous;
+        $next = $next > $+[0] + 100 ? $+[0] + 100 : $next;
       }
       
       push @results, {
-	zset    => $file,
-	text    => substr($pm, $previous, $next - $previous),
-	snippet => [$previous, $next],
-	match   => [$-[0], $+[0]]
+        zset    => $file,
+        text    => substr($pm, $previous, $next - $previous),
+        snippet => [$previous, $next],
+        match   => [$-[0], $+[0]],
+        linenum => $linenum,
       };
       
       last if ++$matches > $max;
@@ -105,8 +114,8 @@ while(1) {
     my $start = time;
     do_match($job->{re}, $max, $job->{notify}, $slabs);
     $redis->publish($job->{notify} => encode_json {
-	done => 1,
-	id => $job->{id}});
+      done => 1,
+      id => $job->{id}});
     my $end = time;
     print "$$: job done (", $end-$start, "s)\n";
   }

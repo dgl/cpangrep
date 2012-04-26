@@ -20,7 +20,7 @@ use constant MAX => 1_000;
 my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config");
 
 sub dispatch_request {
-  sub (GET + /api) {
+  sub (GET + /api) { # /
     sub (?q=&limit~) {
       my($self, $q, $limit) = @_;
       $limit ||= 100;
@@ -35,13 +35,13 @@ sub dispatch_request {
              ];
     }
   },
-  sub (!/api) {
+  sub (!/api) { # /
     response_filter {
       $_[0] = [ 200, ['Content-type' => 'text/html'],
         [ blessed $_[0] && $_[0]->can("to_html") ? $_[0]->to_html : $_[0] ]];
     }
   },
-  sub (/ + ?q=&page~) {
+  sub (/ + ?q=&page~) { # /
     my($self, $q, $page_number) = @_;
 
     my $r = $self->_search($q);
@@ -52,10 +52,10 @@ sub dispatch_request {
       return render_response($q, undef, $r, undef);
     }
   },
-  sub (/about) {
+  sub (/about) { # /
     HTML::Zoom->from_file(TMPL_PATH . "/about.html")
   },
-  sub (/) {
+  sub (/) { # /
     # XXX: Fix me if this ever becomes an overhead
     my $redis = AnyEvent::Redis->new(host => $config->{"server.queue"});
     HTML::Zoom->from_file(TMPL_PATH . "/grep.html")
@@ -133,17 +133,17 @@ sub render_response {
         $_ = $_->select('.files')->repeat_content([map {
           my $file = $_;
           sub {
+            my $filename = "$package/$file->{file}";
             $_ = $_->select('.excerpts')->repeat_content([map {
               my $excerpt = $_;
               sub {
+                my $ln = $excerpt->{linenum};
                 $_->select('.excerpt')->replace_content(\_render_snippet($excerpt));
+                $_->select('.file-link')->replace_content($filename)
+                  ->then
+                  ->set_attribute(href => "https://metacpan.org/source/$author/$filename#L$ln");
               }
             } @{$file->{results}}]);
-
-            my $filename = "$package/$file->{file}";
-            $_->select('.file-link')->replace_content($filename)
-              ->then
-              ->set_attribute(href => "https://metacpan.org/source/$author/$filename#L1");
           }
         } @{$result->{files}}]);
 
