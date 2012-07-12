@@ -39,10 +39,12 @@ has name => (
 
 sub index {
   my($self, $dist, $distname, $file, $content) = @_;
-
-  $self->_rotate_slab if $self->_slab->full;
-
   $self->_slab->index($dist, $distname, $file, $content);
+}
+
+sub rotate_if_needed {
+  my($self) = @_;
+  $self->_rotate_slab if $self->_slab->full;
 }
 
 sub finish {

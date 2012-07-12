@@ -102,6 +102,7 @@ sub index_dist{
         }
       }
     );
+    $self->_slab->rotate_if_needed;
   };
 
   if($@) {
