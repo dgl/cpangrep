@@ -1,10 +1,9 @@
 # -*- mode: org -*-
-
-* Why is something leaking Redis clients (part of the Search.pm refactor maybe?)
-* Handle overlapping bits
-* Charset guessing?
-
-* Consistent use of config
+* Bugs
+** Double encoding of UTF-8 (e.g. try searching for £ vs typing \x{a3})
+** Why is something leaking Redis clients (part of the Search.pm refactor
+   maybe?)
+** Handle overlapping matches better
 
 * Stop using Tie::Redis in such a stupid/insane way
 * Consider using 0MQ or something other than Redis for queueing
@@ -24,3 +23,6 @@
 
 * AnyEvent::Redis
 ** Cleanup EOF handling
+
+* Consistent use of config
+* Charset guessing?
