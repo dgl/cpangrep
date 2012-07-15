@@ -1,7 +1,7 @@
 use Test::More;
 
 use_ok q{WWW::CPANGrep::Search};
-my $s = new_ok "WWW::CPANGrep::Search", [q => "foo file:test.pm dist:dist.foo"];
+my $s = new_ok "WWW::CPANGrep::Search", [q => "foo file:test.pm dist:dist.foo -dist=bar author:dgl"];
 
 {
   use re::engine::RE2;
@@ -11,6 +11,8 @@ my $s = new_ok "WWW::CPANGrep::Search", [q => "foo file:test.pm dist:dist.foo"];
   is_deeply $s->{_options}, [
     { type => "file", negate => "", re => qr/test.pm/ },
     { type => "dist", negate => "", re => qr/dist.foo/ },
+    { type => "dist", negate => 1, re => qr/^bar$/ },
+    { type => "author", negate => "", re => qr/DGL/ },
   ];
 }                            
 

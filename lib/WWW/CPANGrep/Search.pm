@@ -53,17 +53,19 @@ sub _parse_search {
       my($file, $type) = @_;
       # Shortcut for .pm -> \.(?i:pm)$
       $file = '(?i:\\' . $file . ')$' if $file =~ /^\.\w+$/;
-      { type => "file", re => _re2_compile($file), negate => $type eq '-' }
+      { type => "file", re => _re2_compile($type eq '=' ? "^$file\$" : $file), negate => $negate }
     },
     dist => sub {
-      my($dist, $type) = @_;
-      { type => "dist", re => _re2_compile($dist), negate => $type eq '-' }
+      my($dist, $type, $negate) = @_;
+      { type => "dist", re => _re2_compile($type eq '=' ? "^$dist\$" : $dist), negate => $negate }
     },
     author => sub {
-      my($author, $type) = @_;
-      { type => "author",
-        re => _re2_compile($author =~ /^\w+/ ? uc $author : $author),
-        negate => $type eq '-'
+      my($author, $type, $negate) = @_;
+      my $match = $author =~ /^\w+/ ? uc $author : $author;
+      {
+        type => "author",
+        re => _re2_compile($type eq '=' ? "^$re\$" : $re),
+        negate => $negate,
       }
     },
   );
@@ -72,12 +74,13 @@ sub _parse_search {
   my $opt_re = '(?:' . join('|', keys %options) . ')';
   my $arg_re = '(?:' . gen_delimited_pat(q{"/}) . '|\S+)';
 
-  while($q =~ s/(^|\s)(?<type>-?)(?<opt>$opt_re):(?<arg>$arg_re)(?:$|\s)/$1/g) {
+  while($q =~ s/(^|\s)(?<negate>-?)(?<opt>$opt_re)(?<type>[:=])(?<arg>$arg_re)(?:$|\s)/$1/g) {
     my $opt = $options{$+{opt}};
     next unless $opt;
+    my $negate = $+{negate} eq '-';
     my $type = $+{type};
     my $arg = $+{arg} =~ s/(?:^"(.*)"$|(.*))/$2||$1 =~ s{\\(.)}{$1}gr/re;
-    push @options, $opt->($arg, $type);
+    push @options, $opt->($arg, $type, $negate);
   }
 
   $q =~ s/\s+$//;
