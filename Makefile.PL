@@ -22,6 +22,7 @@ my %opts = (
     'CPAN::DistnameInfo' => 0,
     'Starman' => 0,
     'Set::Object' => 0,
+    'namespace::autoclean' => 0,
   }
 );
 
