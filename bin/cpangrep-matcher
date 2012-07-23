@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use 5.010;
+use POSIX ();
 use Time::HiRes qw(time);
 use EV;
 use AnyEvent::Redis;
@@ -12,15 +13,18 @@ use Config::GitLike;
 my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config");
 my $dir = $config->{"location.slabs"};
 
-my $c = $config->{"matcher.concurrency"} || 8;
+my $c = $ARGV[0] || $config->{"matcher.concurrency"} || 8;
 
-for(1 .. $c) {
-  my $pid = fork;
-  if($pid) {
-    if($_ == $c) { exit }
-    next;
-  } else {
-    last;
+# XXX: Use some module for this, this is silly
+if($c > 1) {
+  for(1 .. $c) {
+    my $pid = fork;
+    if($pid) {
+      if($_ == $c) { exit }
+      next;
+    } else {
+      last;
+    }
   }
 }
 
@@ -62,7 +66,7 @@ sub do_match {
 	     error => "Regexp is too greedy"
          });
          return;
-      } 
+      }
 
       # XXX: A bit broken in edge cases.
       # Be careful not to use regexps!
@@ -95,9 +99,19 @@ sub do_match {
 
 print "$$: ready\n";
 
+my $HUP_set = POSIX::SigSet->new(POSIX::SIGHUP);
+$SIG{HUP} = sub {
+  # (Arguably due to a bug in perl's signal handling) we end up with the
+  # signal still blocked after the exec(), so unblock it manually now.
+  POSIX::sigprocmask(POSIX::SIG_UNBLOCK, $HUP_set);
+  exec $^X, $0, 1;
+  die "exec() failed: $!";
+};
+
 while(1) {
   while(my $item = $redis->blpop("queue:cpangrep:slabsearch", 60)->recv) {
     last unless $item->[0];
+    POSIX::sigprocmask(POSIX::SIG_BLOCK, $HUP_set);
     print "$$: processing job: $item->[1]\n";
     my $job = decode_json $item->[1];
     my $slabs = [map $redis->lindex($job->{slablist}, $_)->recv, @{$job->{slabs}}];
@@ -109,7 +123,7 @@ while(1) {
 	id => $job->{id}});
     my $end = time;
     print "$$: job done (", $end-$start, "s)\n";
+    POSIX::sigprocmask(POSIX::SIG_UNBLOCK, $HUP_set);
   }
   $redis->ping->recv;
 }
-

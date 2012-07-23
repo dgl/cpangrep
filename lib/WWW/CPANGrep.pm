@@ -184,11 +184,16 @@ sub _maybe_update {
 
   my $sha1 = _get_commit_id($ref);
 
+  # Grab tags and commits, to avoid relying on git config too much
+  system "git", "fetch", "origin";
   system "git", "fetch", "-t", "origin";
 
   # New code?
   if(_get_commit_id($ref) ne $sha1) {
     system "git", "merge", "HEAD", $ref;
+
+    kill HUP => getppid; # starman parent process
+    kill HUP => qx{pgrep -f cpangrep-matcher};
   }
 }
 

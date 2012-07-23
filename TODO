@@ -21,3 +21,6 @@
 ** File level (SHA1?)
 ** Too many matches in distro (more...)
 * API
+
+* AnyEvent::Redis
+** Cleanup EOF handling
