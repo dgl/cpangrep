@@ -209,7 +209,7 @@ sub search {
           notify => $notify,
           # TODO: tune this
           max => 10_000 * (1 / log 1 + @slabs)
-        }));
+        }), sub {});
     }
   }
 
