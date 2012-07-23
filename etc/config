@@ -1,3 +1,8 @@
+[Update]
+  ; Set to 'live' on the live site (a manually maintained tag), else follow
+  ; master (for http://a.grep.cpan.me)
+  Ref = origin/master
+
 [Location]
   CPAN  = fakecpan-sampler-0.001
   Slabs = var/slabs

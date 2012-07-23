@@ -55,6 +55,10 @@ sub dispatch_request {
   sub (/about) {
     HTML::Zoom->from_file(TMPL_PATH . "/about.html")
   },
+  sub (/githook) {
+    _maybe_update();
+    HTML::Zoom->from_file(TMPL_PATH . "/about.html")
+  },
   sub (/) {
     # XXX: Fix me if this ever becomes an overhead
     my $redis = AnyEvent::Redis->new(host => $config->{"server.queue"});
@@ -168,6 +172,34 @@ sub _render_snippet {
     $html;
   } or do print "$@";
   $html ||= "";
+}
+
+sub _maybe_update {
+  # Slightly scary in place updating. Note there is no auth for now, someone could DoS us a
+  # bit, but not much else.
+  return unless -d ".git";
+
+  my $ref = $config->{"update.ref"};
+  return unless $ref;
+
+  my $sha1 = _get_commit_id($ref);
+
+  system "git", "fetch", "-t", "origin";
+
+  # New code?
+  if(_get_commit_id($ref) ne $sha1) {
+    system "git", "merge", "HEAD", $ref;
+  }
+}
+
+sub _get_commit_id {
+  my($ref) = @_;
+
+  my $pid = open my $fh, "-|", qw(git log --format=%H -1), $ref or return;
+  my($id) = <$fh> =~ /(\S+)/;
+  waitpid $pid, 0;
+
+  return $id;
 }
 
 WWW::CPANGrep->run_if_script;
