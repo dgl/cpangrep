@@ -50,7 +50,7 @@ sub _parse_search {
 
   my %options = (
     file => sub {
-      my($file, $type) = @_;
+      my($file, $type, $negate) = @_;
       # Shortcut for .pm -> \.(?i:pm)$
       $file = '(?i:\\' . $file . ')$' if $file =~ /^\.\w+$/;
       { type => "file", re => _re2_compile($type eq '=' ? "^$file\$" : $file), negate => $negate }
