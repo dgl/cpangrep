@@ -106,7 +106,8 @@ sub render_response {
 
   if($error || !@$results) {
     return $output
-      ->select('.divider')->replace_content(" ")
+      ->select('#result-count')->replace_content(" ")
+      ->select('#time')->replace_content(sprintf "%0.2f", $duration)
       ->select('.result')->replace_content($error || "No matches found.")
       ->select('.pagination')->replace("");
   }
