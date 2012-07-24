@@ -219,17 +219,21 @@ sub search {
 
 sub _find_slabs {
   my($self, $redis) = @_;
-  # XXX: This is pretty small with a small number of web workers, but can do
-  # better (make the matcher more intelligent?)
-  state $dist_slab_map = { @{$redis->hgetall("cpangrep:dists")->recv} };
-  state $all_slabs = $redis->lrange($config->{"key.slabs"}, 0, -1)->recv;
-  state $slab_id_map = { map +($all_slabs->[$_] => $_), 0 .. $#$all_slabs };
+  # XXX: Store a generation of the index somewhere so these can be cached.
+  my $dist_slab_map;
+  my $all_slabs = $redis->lrange($config->{"key.slabs"}, 0, -1)->recv;
+  my $slab_id_map = { map +($all_slabs->[$_] => $_), 0 .. $#$all_slabs };
 
   my $slabs = set(@$all_slabs);
 
   for my $option(values $self->_options) {
     if(!$option->{negate}) {
       if($option->{type} eq 'dist') {
+
+        # XXX: This is pretty small with a small number of web workers, but can do
+        # better (make the matcher more intelligent?)
+        $dist_slab_map ||= { @{$redis->hgetall("cpangrep:dists")->recv} };
+
         $slabs = set(map $dist_slab_map->{$_}, grep $_ =~ $option->{re}, keys
           $dist_slab_map)->intersection($slabs);
       }
