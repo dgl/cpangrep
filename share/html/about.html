@@ -43,14 +43,16 @@
 
                 <h2>Syntax</h2>
 
-                The following operators are supported, they accept regexps and negation with a <code>-</code> prepended to their name. Anything that does not match this syntax will be treated as a regexp on the code itself.
+                The following operators are supported, they accept regexps (after the colon) and can be negated with a <code>-</code> prepended to their name. Anything that does not match this syntax will be treated as a regexp on the code itself.
                 <ul>
                   <li><code>file:</code> Search filenames within a distribution.</li>
                   <li><code>dist:</code> Search distribution names.</li>
                   <li><code>author:</code> Search CPAN author ID.</li>
                 </ul>
 
-                For example <code>-dist:^perl$</code> to exclude perl, <code>file:.xs</code> to search only XS files or <code>-file:"ppport\.h"</code> to exclude ppport.h.
+                <p>For example <code>-dist:^perl$</code> to exclude perl, <code>file:.xs</code> to search only XS files or <code>-file:"ppport\.h"</code> to exclude ppport.h.</p>
+
+                <p>Much of the power of this tool comes from the fact raw regexps can be used. By default the search is case sensitive, but <code>(?i)</code> or <code>(?i:regexp)</code> syntax can be used to make it case insensitive. Escapes such as \n can be used to match on newlines or the <code>(?s)</code> modifier (be careful with this, very greedy matching is limited for resource reasons, you may find writing a regexp such as <code>.{1,10}</code> rather than blindly writing <code>.*</code> is more effective).</p>
 
 		<h2>Examples</h2>
 		A picture is worth a thousand words, an example more. <small>&ndash; I just made that up.</small>
