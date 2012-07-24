@@ -27,9 +27,17 @@ You just need a redis-server binary around, C<run-test> below will start it for 
 
 =item * Visit L<http://localhost:5000>
 
+=item * Hack!
+
+Starman will pick up changes automatically, so web frontend changes should be
+picked up right away.
+
 =back
 
 =head2 Components
+
+If you want to work on the indexing or other aspects you might need to run
+these, to start with C<run-test> may well be enough though.
 
 =over 4
 
@@ -54,8 +62,8 @@ There's also a version that wraps this in L<Plack::Debug> in F<debug.psgi>.
 
 =item * cpangrep-matcher
 
-Backend workers that do the matching, based on a redis queue. This should be running along with the web
-frontend, all the time:
+Backend workers that do the matching, based on a redis queue. This should be
+running along with the web frontend, all the time:
 
   bin/cpangrep-matcher
 
