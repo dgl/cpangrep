@@ -64,7 +64,7 @@ sub _parse_search {
       my $match = $author =~ /^\w+/ ? uc $author : $author;
       {
         type => "author",
-        re => _re2_compile($type eq '=' ? "^$re\$" : $re),
+        re => _re2_compile($type eq '=' ? "^$match\$" : $match),
         negate => $negate,
       }
     },
