@@ -52,13 +52,15 @@ sub finish {
 
   my $r = (tied %{$self->redis})->{_conn};
 
-  # Tie::Redis won't autovivify yet :(
-  $self->redis->{$self->name} ||= [];
+  if($self->_slab->size) {
+    # Tie::Redis won't autovivify yet :(
+    $self->redis->{$self->name} ||= [];
 
-  push @{$self->redis->{$self->name}}, $self->_slab->name;
+    push @{$self->redis->{$self->name}}, $self->_slab->name;
 
-  for my $dist(keys %{$self->_slab->seen_dists}) {
-    $r->hset("cpangrep:dists", $dist, $self->_slab->name);
+    for my $dist(keys %{$self->_slab->seen_dists}) {
+      $r->hset("cpangrep:dists", $dist, $self->_slab->name);
+    }
   }
 
   $self->_slab(undef);

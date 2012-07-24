@@ -39,7 +39,7 @@ has seen_dists => (
   default => sub { {} },
 );
 
-has _size => (
+has size => (
   is => 'rw',
   isa => 'Int',
   default => 0,
@@ -76,7 +76,7 @@ sub index {
 
   print {$self->_fh} $$content, SLAB_SEPERATOR;
 
-  $self->redis->zadd($self->name, $self->_size, encode_json {
+  $self->redis->zadd($self->name, $self->size, encode_json {
       size     => length($$content),
       dist     => $dist,
       distname => $distname,
@@ -85,12 +85,12 @@ sub index {
 
   $self->{seen_dists}{$distname}++;
 
-  $self->_size($self->_size + length($$content) + length SLAB_SEPERATOR);
+  $self->size($self->size + length($$content) + length SLAB_SEPERATOR);
 }
 
 sub full {
   my($self) = @_;
-  return $self->_size >= $self->rotate_size;
+  return $self->size >= $self->rotate_size;
 }
 
 __PACKAGE__->meta->make_immutable;
