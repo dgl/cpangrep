@@ -7,9 +7,9 @@
 	<Contact>dgl@dgl.cx</Contact>
 	<Tags>CPAN grep CPANgrep Perl</Tags>
 
-	<Image height="16" width="16" type="image/x-icon">http://grep.cpan.me/favicon.ico</Image>
-	<Image height="16" width="16" type="image/png"   >http://grep.cpan.me/favicon.png</Image>
-	<Image height="64" width="64" type="image/png"   >http://grep.cpan.me/magnify64.png</Image>
+	<Image height="16" width="16" type="image/x-icon">http://s.cpan.me/favicon.ico</Image>
+	<Image height="16" width="16" type="image/png"   >http://s.cpan.me/favicon.png</Image>
+	<Image height="64" width="64" type="image/png"   >http://s.cpan.me/magnify64.png</Image>
 
 	<Query role="example" title="Where are the easter eggs hidden?"                             searchTerms="easter egg"                 />
 	<Query role="example" title='GvCV\s*\([^)]+\)\s*=[^=] — search for assignments to GvCV'     searchTerms='GvCV\s*\([^)]+\)\s*=[^=]'   />
@@ -24,5 +24,5 @@
 	<SyndicationRight>open</SyndicationRight>
 
 	<Url type="text/html"                             rel="results" template="http://grep.cpan.me/?q={searchTerms}&amp;page={startPage?}&amp;limit={count?}" />
-	<Url type="application/opensearchdescription+xml" rel="self"    template="http://grep.cpan.me/opensearch.xml"                                            />
+	<Url type="application/opensearchdescription+xml" rel="self"    template="http://s.cpan.me/opensearch.xml"                                            />
 </OpenSearchDescription>
