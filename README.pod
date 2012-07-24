@@ -73,3 +73,12 @@ A Redis server (or several for the live version) are used for queuing jobs and
 also resolving matches.
 
 =back
+
+=head2 Deployment
+
+Currently the C<"live"> tag refers to the version that is live. To push a new version:
+
+  git tag -f live
+  git push --tags
+
+(See the handler for /githook for how this works.)
