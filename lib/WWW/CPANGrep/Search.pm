@@ -255,7 +255,7 @@ sub filter_results {
       $option->{type} eq 'file'   ? sub { $_->{file}->{file} =~ $option->{re} } :
       $option->{type} eq 'dist'   ? sub { $_->{file}->{distname} =~ $option->{re} } :
       $option->{type} eq 'author' ? sub { (split m{/}, $_->{file}->{dist}, 2)[0] =~ $option->{re} } :
-      die "Unkown type";
+      die "Unknown type";
     my $matcher = $predicate;
     $matcher = sub { !$predicate->() } if $option->{negate};
     @results = grep $matcher->(), @results;
@@ -279,23 +279,34 @@ sub filter_results {
       push @{$files{$result->{file}->{file}}}, $result;
     }
 
-    push @ordered, { dist => $dist, files => [], truncated => 0 };
+    push @ordered, {
+      dist => $dist,
+      distname => $dist_results[0]->{file}->{distname},
+      files => [],
+      truncated => 0,
+    };
 
     my $i = 0;
     for my $file(sort { lc $a cmp lc $b } keys %files) {
-      my @file_results = @{$files{$file}};
-
-      if(@file_results > 3 && keys %files > 1) {
-        @file_results = @file_results[0 .. 2];
-        $file_results[-1]->{truncated} = 1;
-      }
-
-      push $ordered[-1]->{files}, { file => $file, results => \@file_results };
-
-      if($i++ >= 20 / keys %dists) {
-        $ordered[-1]->{truncated} = 1;
+      if(keys %dists > 1 && $i >= 20 / keys %dists) {
+        $ordered[-1]->{truncated} = scalar keys(%files) - $i;
         last;
       }
+      $i++;
+
+      my @file_results = @{$files{$file}};
+
+      my $truncated = 0;
+      if(keys %files > 1 && @file_results > 3) {
+        $truncated = @file_results - 3;
+        @file_results = @file_results[0 .. 2];
+      }
+
+      push $ordered[-1]->{files}, {
+        file => $file,
+        results => \@file_results,
+        truncated => $truncated,
+      };
     }
   }
 

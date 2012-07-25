@@ -121,18 +121,21 @@ sub render_response {
       link_format      => '<a href="?q=' . encode_entities(uri_escape_utf8($q)) . '&amp;page=%p">%a</a>'
     });
 
+  my @result_set = @$results[$pager->first - 1 .. $pager->last - 1];
+
   $output = $output
     ->select('#time')->replace_content(sprintf "%0.2f", $duration)
     ->select('#total')->replace_content($count > MAX ? "more than " . MAX : $count)
     ->select('#start-at')->replace_content($pager->first)
-    ->select('#end-at')->replace_content($pager->last);
+    ->select('#end-at')->replace_content(scalar map @{$_->{results}},
+        map @{$_->{files}}, @result_set);
 
   $output = $output->select('.results')->repeat_content(
     [ map {
       my $result = $_;
       sub {
         my($package) = $result->{dist} =~ m{([^/]+)$};
-        $package =~ s/\.(?:tar\.gz|zip|tar\.bz2)$//;
+        $package =~ s/\.(?:tar\.gz|zip|tar\.bz2|tgz|tbz)$//i;
         my $author = ($result->{dist} =~ m{^([^/]+)})[0];
 
         $_ = $_->select('.files')->repeat_content([map {
@@ -146,17 +149,47 @@ sub render_response {
             } @{$file->{results}}]);
 
             my $filename = "$package/$file->{file}";
-            $_->select('.file-link')->replace_content($filename)
+            $_ = $_->select('.file-link')->replace_content($filename)
               ->then
               ->set_attribute(href => "https://metacpan.org/source/$author/$filename#L1");
+
+            if($file->{truncated}) {
+              $_ = $_->select('.file-number')
+                ->replace_content($file->{truncated})
+                ->select('.more-file')
+                ->set_attribute(href => "/?q=$q+dist=$result->{distname}+file=$file->{file}");
+
+              if($file->{truncated} == 1) {
+                $_ = $_->select('.plural')->replace("");
+              }
+            } else {
+              $_ = $_->select('.more-file')->replace("");
+            }
+
+            $_;
           }
         } @{$result->{files}}]);
 
-        $_->select('.dist-link')->replace_content("$author/$package")
+        $_ = $_->select('.dist-link')->replace_content("$author/$package")
           ->then
           ->set_attribute(href => "https://metacpan.org/release/$author/$package");
+
+        if($result->{truncated}) {
+          $_ = $_->select('.dist-number')
+            ->replace_content($result->{truncated})
+            ->select('a.more-dist')
+            ->set_attribute(href => "/?q=$q+dist=$result->{distname}");
+
+          if($result->{truncated} == 1) {
+            $_ = $_->select('.plural')->replace("");
+          }
+        } else {
+          $_ = $_->select('.more-dist')->replace("");
+        }
+
+        $_;
       }
-    } @$results[$pager->first - 1 .. $pager->last - 1]]);
+    } @result_set]);
 
   return $output->select('.pagination')->replace_content(\$pager->html);
 }
