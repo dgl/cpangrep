@@ -157,7 +157,7 @@ sub render_response {
               $_ = $_->select('.file-number')
                 ->replace_content($file->{truncated})
                 ->select('.more-file')
-                ->set_attribute(href => "/?q=$q+dist=$result->{distname}+file=$file->{file}");
+                ->set_attribute(href => "/?q=" . uri_escape_utf8($q) . "+dist=$result->{distname}+file=$file->{file}");
 
               if($file->{truncated} == 1) {
                 $_ = $_->select('.file-plural')->replace("");
@@ -178,7 +178,7 @@ sub render_response {
           $_ = $_->select('.dist-number')
             ->replace_content($result->{truncated})
             ->select('a.more-dist')
-            ->set_attribute(href => "/?q=$q+dist=$result->{distname}");
+            ->set_attribute(href => "/?q=" . uri_escape_utf8($q) . "+dist=$result->{distname}");
 
           if($result->{truncated} == 1) {
             $_ = $_->select('.dist-plural')->replace("");
