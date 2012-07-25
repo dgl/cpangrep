@@ -160,7 +160,7 @@ sub render_response {
                 ->set_attribute(href => "/?q=$q+dist=$result->{distname}+file=$file->{file}");
 
               if($file->{truncated} == 1) {
-                $_ = $_->select('.plural')->replace("");
+                $_ = $_->select('.file-plural')->replace("");
               }
             } else {
               $_ = $_->select('.more-file')->replace("");
@@ -181,7 +181,7 @@ sub render_response {
             ->set_attribute(href => "/?q=$q+dist=$result->{distname}");
 
           if($result->{truncated} == 1) {
-            $_ = $_->select('.plural')->replace("");
+            $_ = $_->select('.dist-plural')->replace("");
           }
         } else {
           $_ = $_->select('.more-dist')->replace("");
