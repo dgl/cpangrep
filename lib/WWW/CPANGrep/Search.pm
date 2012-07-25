@@ -297,7 +297,7 @@ sub filter_results {
       my @file_results = @{$files{$file}};
 
       my $truncated = 0;
-      if(keys %files > 1 && @file_results > 3) {
+      if((keys %dists > 1 || keys %files > 1) && @file_results > 3) {
         $truncated = @file_results - 3;
         @file_results = @file_results[0 .. 2];
       }
