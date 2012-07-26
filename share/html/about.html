@@ -67,10 +67,14 @@
 		<li><a href="/?q=%5E%3Dhead1+NAME%5B%5Cr%5Cn+%5D%2B.*Foo\b">Files with a "NAME" POD section with "Foo" on the first line.</a>
                 <li><a href="/?q=file:\.(?i:xs|c(?:c?|pp))$+-dist=perl+SVt_REGEXP">XS, C or C++ files not in the perl core that reference SVt_REGEXP</a>
 		</ul>
-		(If you find any more good examples please send them my way.)
+                (If you find any more good examples please send them my way.)
+
+                <h2>API</h2>
+
+                <p>There is an experimental API (i.e. subject to change), using the same syntax as the normal searches at: <code>http://grep.cpan.me/api?q=</code>. For example: <a href="/api?q=-dist=perl+GvCV">http://grep.cpan.me/api?q=-dist=perl+GvCV</a>. If you expect to make heavy usage of this please ensure you send a User-Agent header that describes your application (ideally with contact details) and send a mail to the mailing list so we can keep track of users.</p>
 
 		<h2>Misc</h2>
-		<p>Written by <a href="https://dgl.cx">David Leadbeater</a>. For help ask me (dg) on irc.perl.org, #toolchain or mail dgl at dgl.cx.</p>
+                <p>Written by <a href="https://dgl.cx">David Leadbeater</a>. For help <a href="https://groups.google.com/forum/#!forum/cpangrep">use the cpangrep mailing list</a> or ask me (dg) on irc.perl.org, #toolchain.</p>
                 <p>Contributions are welcome; you can find the git repository at <a href="https://github.com/dgl/cpangrep">github</a> (including the <a href="https://github.com/dgl/cpangrep/issues?state=open">issue tracker</a>).</p>
 
 		Thanks to <a href="http://taras.net/">taras</a> for help with graphics and layout.
