@@ -9,7 +9,7 @@
 	<meta name="keywords" content="cpan,search,regex,regexp,regular,expressions,reg,exp,ex,re,find,through,within,inside,in" />
 	<meta name="robots" content="all" />
 	<link rel="icon" type="image/png" href="/favicon.png" />
-	<link rel="stylesheet" type="text/css" media="screen, projection" href="//dg.cx/cpangrep/cpangrep.css" />
+	<link rel="stylesheet" type="text/css" media="screen, projection" href="//s.cpan.me/cpangrep.css" />
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
@@ -30,7 +30,7 @@
 	<div class="page">
 
 		<div class="pageheader">
-			<a href="/"><img src="//dg.cx/cpangrep/logo2.png" alt="CPAN-&gt;grep" /></a>
+			<a href="/"><img src="//s.cpan.me/logo2.png" alt="CPAN-&gt;grep" /></a>
 		</div>
 
 		<h2>Description</h2>
@@ -57,7 +57,7 @@
                 <p>Much of the power of this tool comes from the fact raw regexps can be used. By default the search is case sensitive, but <code>(?i)</code> or <code>(?i:regexp)</code> syntax can be used to make it case insensitive. Escapes such as \n can be used to match on newlines or the <code>(?s)</code> modifier (be careful with this, very greedy matching is limited for resource reasons, you may find writing a regexp such as <code>.{1,10}</code> rather than blindly writing <code>.*</code> is more effective).</p>
 
 		<h2>Examples</h2>
-		A picture is worth a thousand words, an example more. <small>&ndash; I just made that up.</small>
+		A picture is worth a thousand words:
 		<p>
 		<ul>
 		<li><a href="/?q=easter%20egg">Where are the easter eggs hidden?</a></li>
@@ -65,13 +65,13 @@
 		<li><a href="/?q=(?i:this+should+work,+but)">"this should work, but"...</a></li>
 		<li><a href="/?q=%5E%23.*ACHTUNG">^#.*ACHTUNG</a></li>
 		<li><a href="/?q=%5E%3Dhead1+NAME%5B%5Cr%5Cn+%5D%2B.*Foo\b">Files with a "NAME" POD section with "Foo" on the first line.</a>
-                <li><a href="/?q=file:\.(?i:xs|c(?:c?|pp))$+-dist:^perl$+SVt_REGEXP">XS, C or C++ files not in the perl core that reference SVt_REGEXP</a>
+                <li><a href="/?q=file:\.(?i:xs|c(?:c?|pp))$+-dist=perl+SVt_REGEXP">XS, C or C++ files not in the perl core that reference SVt_REGEXP</a>
 		</ul>
 		(If you find any more good examples please send them my way.)
 
 		<h2>Misc</h2>
 		<p>Written by <a href="https://dgl.cx">David Leadbeater</a>. For help ask me (dg) on irc.perl.org, #toolchain or mail dgl at dgl.cx.</p>
-                <p>Contributions are welcome, you can find the git repository at <a href="https://github.com/dgl/cpangrep">github</a>.</p>
+                <p>Contributions are welcome; you can find the git repository at <a href="https://github.com/dgl/cpangrep">github</a> (including the <a href="https://github.com/dgl/cpangrep/issues?state=open">issue tracker</a>).</p>
 
 		Thanks to <a href="http://taras.net/">taras</a> for help with graphics and layout.
 	</div>
