@@ -26,13 +26,7 @@ sub dispatch_request {
       $limit ||= 100;
       my $r = $self->_search($q);
 
-      return [ 200, ['Content-type' => 'application/json' ],
-               [ to_json {
-                   count => $r->{count},
-                   duration => $r->{duration},
-                   results => [grep defined, @{$r->{results}}[0 .. $limit]]
-                 }, { pretty => 1 } ]
-             ];
+      _format_api($r, $limit);
     }
   },
   sub (!/api) {
@@ -203,6 +197,37 @@ sub render_response {
     } @result_set]);
 
   return $output->select('.pagination')->replace_content(\$pager->html);
+}
+
+sub _format_api {
+  my($r, $limit) = @_;
+
+  my @results = grep defined, @{$r->{results}}[0 .. $limit];
+
+  # Clean up the results a little
+  # TODO: Can we just clean up the internal data structure to just match this?
+  for my $result(@results) {
+    for my $file(@{$result->{files}}) {
+      for my $file_result(@{$file->{results}}) {
+        delete $file_result->{snippet};
+        delete $file_result->{zset};
+        # The file thing is duplication, although size could be useful so move
+        # up a level.
+        my $inner_file = delete $file_result->{file};
+        $file->{size} = $inner_file->{size};
+      }
+    }
+  }
+
+  return [200,
+    ['Content-type' => 'application/json' ],
+    [ to_json {
+        count => $r->{count},
+        duration => $r->{duration},
+        results => \@results,
+      }, { pretty => 1 }
+    ]
+  ];
 }
 
 sub _render_snippet {
