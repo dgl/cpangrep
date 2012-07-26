@@ -98,7 +98,7 @@ sub _search {
 }
 
 sub render_response {
-  my($q, $results, $error, $duration, $page_number, $count) = @_;
+  my($q, $results, $error, $duration, $page_number, $match_count) = @_;
 
   my $output = HTML::Zoom->from_file(TMPL_PATH . "/results.html")
     ->select('title')->replace_content("$q · CPAN->grep")
@@ -113,7 +113,7 @@ sub render_response {
   }
 
   my $pager = Data::Pageset::Render->new({
-      total_entries    => $results ? scalar @$results : 0,
+      total_entries    => scalar @$results,
       entries_per_page => 25,
       current_page     => $page_number || 1,
       pages_per_set    => 5,
@@ -123,12 +123,23 @@ sub render_response {
 
   my @result_set = @$results[$pager->first - 1 .. $pager->last - 1];
 
+  my $count = scalar @$results;
+  my $count_type = "distributions";
+
+  if($results && @$results == 1) {
+    $count = $match_count;
+    $count_type = "results";
+  }
+
   $output = $output
     ->select('#time')->replace_content(sprintf "%0.2f", $duration)
     ->select('#total')->replace_content($count > MAX ? "more than " . MAX : $count)
+    ->select('#count-type')->replace_content($count_type)
     ->select('#start-at')->replace_content($pager->first)
-    ->select('#end-at')->replace_content(scalar map @{$_->{results}},
-        map @{$_->{files}}, @result_set);
+    ->select('#end-at')->replace_content(
+      $count_type eq 'distributions'
+        ? $pager->last
+        : scalar map @{$_->{results}}, map @{$_->{files}}, @result_set);
 
   $output = $output->select('.results')->repeat_content(
     [ map {
