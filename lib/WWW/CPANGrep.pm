@@ -27,11 +27,11 @@ sub dispatch_request {
       my $r = $self->_search($q);
 
       return [ 200, ['Content-type' => 'application/json' ],
-               [ encode_json({
+               [ to_json {
                    count => $r->{count},
                    duration => $r->{duration},
                    results => [grep defined, @{$r->{results}}[0 .. $limit]]
-                 })]
+                 }, { pretty => 1 } ]
              ];
     }
   },
