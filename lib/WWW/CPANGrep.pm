@@ -99,9 +99,15 @@ sub render_response {
     ->select('input[name="q"]')->add_to_attribute(value => $q);
 
   if($error || !@$results) {
+    if($error) {
+      $output = $output->select('.divider')->replace_content("Error");
+    } else {
+      $output = $output->select('#result-count')->replace_content(" ")
+        ->select('#time')->replace_content(
+          $duration ? sprintf "%0.2f", $duration: "")
+    }
+
     return $output
-      ->select('#result-count')->replace_content(" ")
-      ->select('#time')->replace_content(sprintf "%0.2f", $duration)
       ->select('.result')->replace_content($error || "No matches found.")
       ->select('.pagination')->replace("");
   }
