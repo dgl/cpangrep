@@ -35,7 +35,7 @@
 
 		<h2>Description</h2>
                 <p>Akin to Google's former Code Search, this aims to search all the code found on CPAN. It
-                concenrates on searching code; if you just want to look for a module use <a
+                concentrates on searching code; if you just want to look for a module use <a
                   href="//metacpan.org">MetaCPAN</a> instead.</p>
 
 		<p><a name="re" />Regular Expressions are supported via re::engine::RE2 (which wraps RE2 that originated from Google's Code Search). This means that the regexps supported are mostly Perl compatible but are not totally compatible with Perl. Of particular note is look-ahead and look-behind are not supported, for more details see <a href="http://code.google.com/p/re2/wiki/Syntax">RE2's supported syntax</a>.</p>
@@ -54,7 +54,7 @@
 
                 <p>For example <code>-dist=perl</code> to exclude perl, <code>file:.xs</code> to search only XS files or <code>-file:"ppport\.h"</code> to exclude ppport.h.</p>
 
-                <p>Much of the power of this tool comes from the fact raw regexps can be used. By default the search is case sensitive, but <code>(?i)</code> or <code>(?i:regexp)</code> syntax can be used to make it case insensitive. Escapes such as \n can be used to match on newlines or the <code>(?s)</code> modifier (be careful with this, very greedy matching is limited for resource reasons, you may find writing a regexp such as <code>.{1,10}</code> rather than blindly writing <code>.*</code> is more effective).</p>
+                <p>Much of the power of this tool comes from the fact that raw regexps can be used. By default the search is case sensitive, but <code>(?i)</code> or <code>(?i:regexp)</code> syntax can be used to make it case insensitive. Escapes such as \n can be used to match on newlines or the <code>(?s)</code> modifier (be careful with this, very greedy matching is limited for resource reasons, you may find writing a regexp such as <code>.{1,10}</code> rather than blindly writing <code>.*</code> is more effective).</p>
 
 		<h2>Examples</h2>
 		A picture is worth a thousand words:
