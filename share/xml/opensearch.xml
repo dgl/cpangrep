@@ -12,7 +12,7 @@
 	<Image height="64" width="64" type="image/png"   >http://s.cpan.me/magnify64.png</Image>
 
 	<Query role="example" title="Where are the easter eggs hidden?"                             searchTerms="easter egg"                 />
-	<Query role="example" title='GvCV\s*\([^)]+\)\s*=[^=] — search for assignments to GvCV'     searchTerms='GvCV\s*\([^)]+\)\s*=[^=]'   />
+	<Query role="example" title='GvCV\s*\([^)]+\)\s*=[^=] - search for assignments to GvCV'     searchTerms='GvCV\s*\([^)]+\)\s*=[^=]'   />
 	<Query role="example" title='"this should work, but"...'                                    searchTerms='(?i:this should work, but)' />
 	<Query role="example" title='^#.*ACHTUNG'                                                   searchTerms='^#.*ACHTUNG'                />
 	<Query role="example" title='Files with a "NAME" POD section with "Foo" on the first line.' searchTerms='^=head1 NAME[\r\n ]+.*Foo'  />
