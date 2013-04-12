@@ -1,12 +1,13 @@
 package WWW::CPANGrep::Index;
 use Config::GitLike;
+use File::Spec;
+use FindBin ();
 use JSON;
 use Moose;
-use namespace::autoclean;
 use Parse::CPAN::Packages;
+use namespace::autoclean;
+
 use WWW::CPANGrep::Index::Worker;
-use FindBin ();
-use Cwd 'abs_path';
 
 with 'MooseX::Getopt';
 with 'WWW::CPANGrep::Role::RedisConnection';
@@ -18,14 +19,18 @@ my $config = Config::GitLike->new(
 has cpan_dir => (
   is => 'ro',
   isa => 'Str',
-  default => sub { abs_path $config->{"location.cpan"} },
+  default => sub {
+    File::Spec->rel2abs($config->{"location.cpan"}, "$FindBin::RealBin/..");
+  },
   documentation => "Directory where CPAN mirror resides",
 );
 
 has slab_dir => (
   is => 'ro',
   isa => 'Str',
-  default => sub { abs_path $config->{"location.slabs"} },
+  default => sub {
+    File::Spec->rel2abs($config->{"location.slabs"}, "$FindBin::RealBin/..");
+  },
   documentation => "Directory in which to save 'slabs' extracted from CPAN",
 );
 
