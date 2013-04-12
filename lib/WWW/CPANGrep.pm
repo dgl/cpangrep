@@ -34,6 +34,7 @@ sub dispatch_request {
       $_[0] = [ 200, ['Content-type' => 'text/html'],
         [ blessed $_[0] && $_[0]->can("to_html") ? $_[0]->to_html : $_[0] ]]
           unless ref $_[0] eq 'ARRAY';
+      $_[0];
     }
   },
   sub (/ + ?q=&page~) {
@@ -61,6 +62,9 @@ sub dispatch_request {
       ->select('#lastupdate')
       ->replace_content($redis->get("cpangrep:lastindex")->recv);
   },
+  sub () {
+    [ 404, [ 'Content-type' => 'text/html' ], [ 'Not found' ] ]
+  }
 };
 
 sub _search {
