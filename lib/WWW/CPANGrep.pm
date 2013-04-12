@@ -32,7 +32,8 @@ sub dispatch_request {
   sub (!/api) {
     response_filter {
       $_[0] = [ 200, ['Content-type' => 'text/html'],
-        [ blessed $_[0] && $_[0]->can("to_html") ? $_[0]->to_html : $_[0] ]];
+        [ blessed $_[0] && $_[0]->can("to_html") ? $_[0]->to_html : $_[0] ]]
+          unless ref $_[0] eq 'ARRAY';
     }
   },
   sub (/ + ?q=&page~) {
