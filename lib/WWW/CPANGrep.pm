@@ -21,8 +21,9 @@ my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config
 
 sub dispatch_request {
   sub (GET + /api) {
-    sub (?q=&limit~) {
+    sub (?@q=&limit~) {
       my($self, $q, $limit) = @_;
+      $q = join " ", @$q;
       $limit ||= 100;
       my $r = $self->_search($q);
 
@@ -37,8 +38,9 @@ sub dispatch_request {
       $_[0];
     }
   },
-  sub (/ + ?q=&page~) {
+  sub (/ + ?@q=&page~) {
     my($self, $q, $page_number) = @_;
+    $q = join " ", @$q;
 
     my $r = $self->_search($q);
     # XXX: Urgh, stop abusing render_response for everything like this...
