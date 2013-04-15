@@ -7,12 +7,12 @@ my $s = new_ok "WWW::CPANGrep::Search", [q => "foo file:test.pm dist:dist.foo -d
   use re::engine::RE2;
 
   is ref $s->{_re}, 're::engine::RE2';
-  is $s->{_re}, qr/foo/;
+  is $s->{_re}, qr/foo/m;
   is_deeply $s->{_options}, [
-    { type => "file", negate => "", re => qr/test.pm/ },
-    { type => "dist", negate => "", re => qr/dist.foo/ },
-    { type => "dist", negate => 1, re => qr/^bar$/ },
-    { type => "author", negate => "", re => qr/DGL/ },
+    { type => "file", negate => "", re => qr/test.pm/m },
+    { type => "dist", negate => "", re => qr/dist.foo/m },
+    { type => "dist", negate => 1, re => qr/^bar$/m },
+    { type => "author", negate => "", re => qr/DGL/m },
   ];
 }                            
 

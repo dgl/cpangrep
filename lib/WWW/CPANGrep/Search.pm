@@ -74,7 +74,7 @@ sub _parse_search {
   my $opt_re = '(?:' . join('|', keys %options) . ')';
   my $arg_re = '(?:' . gen_delimited_pat(q{"/}) . '|\S+)';
 
-  while($q =~ s/(^|\s)(?<negate>-?)(?<opt>$opt_re)(?<type>[:=])(?<arg>$arg_re)(?:$|\s)/$1/g) {
+  while($q =~ s/(^|\s)(?<negate>-?)(?<opt>$opt_re)(?<type>[:=])(?<arg>$arg_re)(?:$|\s)/$1/) {
     my $opt = $options{$+{opt}};
     next unless $opt;
     my $negate = $+{negate} eq '-';
