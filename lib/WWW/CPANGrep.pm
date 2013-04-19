@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 use v5.10;
 use Web::Simple 'WWW::CPANGrep';
 
