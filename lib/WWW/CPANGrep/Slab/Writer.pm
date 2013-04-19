@@ -5,7 +5,7 @@ use namespace::autoclean;
 use File::Slurp;
 use JSON;
 
-use constant SLAB_SEPERATOR => "\n\0\1\2\x{e}\x{0}\x{f}\2\1\0\n";
+use WWW::CPANGrep::Slab::Common;
 
 my $COUNTER = 0;
 

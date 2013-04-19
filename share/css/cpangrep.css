@@ -107,6 +107,11 @@ BODY#grep_index .footer {
 	margin: 0;
 }
 
+.excerpt-link, .excerpt-link:visited, .excerpt-link:active {
+    color: inherit;
+    text-decoration: none;
+}
+
 .excerpt {
 	background: #f2f2f2;
 	font-family: monospace;
