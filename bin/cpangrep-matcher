@@ -9,6 +9,7 @@ use IO::AIO qw(mmap aio_readahead);
 use re::engine::RE2;
 use JSON;
 use Config::GitLike;
+use WWW::CPANGrep::Slab::Common;
 
 my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config");
 my $dir = $config->{"location.slabs"};
@@ -88,8 +89,12 @@ sub do_match {
       # slab file.  Adjustment happens here rather than in WWW::CPANGrep::search()
       # because it lacks easy and fast access to the slab or indexed file
       # content for line counting.
-      my $indexed_file = $redis->zrevrangebyscore($file, $match->[0], "-inf", "withscores", "limit", 0, 1)->recv;
-      my $indexed_file_offset = $indexed_file->[1];
+      my $indexed_file_offset = rindex($pm, SLAB_SEPERATOR, $match->[0]);
+      if ($indexed_file_offset >= 0) {
+          $indexed_file_offset += length SLAB_SEPERATOR;
+      } else {
+          $indexed_file_offset = 0;
+      }
 
       my $text  = substr($pm, $previous, $next - $previous);
       my $start = 1 + substr($pm, $indexed_file_offset, $match->[0] - $indexed_file_offset) =~ tr/\n//;
