@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 use v5.10;
 use Web::Simple 'WWW::CPANGrep';
 
@@ -159,17 +159,21 @@ sub render_response {
         $_ = $_->select('.files')->repeat_content([map {
           my $file = $_;
           sub {
+            my $filename = "$package/$file->{file}";
+            my $source   = "https://metacpan.org/source/$author/$filename";
+
             $_ = $_->select('.excerpts')->repeat_content([map {
               my $excerpt = $_;
               sub {
-                $_->select('.excerpt')->replace_content(\_render_snippet($excerpt));
+                $_ = $_->select('.excerpt')->replace_content(\_render_snippet($excerpt));
+                $_->select('.excerpt-link')->set_attribute(href => "$source#L$excerpt->{line}[0]");
+                # TODO: support the end of match as well once metacpan does (a la github): #L1-L3
               }
             } @{$file->{results}}]);
 
-            my $filename = "$package/$file->{file}";
             $_ = $_->select('.file-link')->replace_content($filename)
               ->then
-              ->set_attribute(href => "https://metacpan.org/source/$author/$filename#L1");
+              ->set_attribute(href => "$source#L1");
 
             if($file->{truncated}) {
               $_ = $_->select('.file-number')

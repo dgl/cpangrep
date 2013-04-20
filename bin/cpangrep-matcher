@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 use strict;
 use 5.010;
 use POSIX ();
@@ -9,6 +9,7 @@ use IO::AIO qw(mmap aio_readahead);
 use re::engine::RE2;
 use JSON;
 use Config::GitLike;
+use WWW::CPANGrep::Slab::Common;
 
 my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config");
 my $dir = $config->{"location.slabs"};
@@ -80,12 +81,31 @@ sub do_match {
 	$previous = $previous < $-[0] - 100 ? $-[0] - 100 : $previous;
 	$next = $next > $+[0] + 100 ? $+[0] + 100 : $next;
       }
-      
+
+      my $match = [$-[0], $+[0]];
+
+      # Calculate matching line numbers which, unlike the returned snippet and
+      # match range, are adjusted for the _indexed_ file contained within the
+      # slab file.  Adjustment happens here rather than in WWW::CPANGrep::search()
+      # because it lacks easy and fast access to the slab or indexed file
+      # content for line counting.
+      my $indexed_file_offset = rindex($pm, SLAB_SEPERATOR, $match->[0]);
+      if ($indexed_file_offset >= 0) {
+          $indexed_file_offset += length SLAB_SEPERATOR;
+      } else {
+          $indexed_file_offset = 0;
+      }
+
+      my $text  = substr($pm, $previous, $next - $previous);
+      my $start = 1 + substr($pm, $indexed_file_offset, $match->[0] - $indexed_file_offset) =~ tr/\n//;
+      my $end   = $start + (substr($pm, $match->[0], $match->[1] - $match->[0]) =~ tr/\n//);
+
       push @results, {
 	zset    => $file,
-	text    => substr($pm, $previous, $next - $previous),
+	text    => $text,
 	snippet => [$previous, $next],
-	match   => [$-[0], $+[0]]
+	match   => $match,
+	line    => [$start, $end],
       };
       
       last if ++$matches > $max;
