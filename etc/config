@@ -6,6 +6,7 @@
 [Location]
   CPAN  = fakecpan-sampler-0.001
   Slabs = var/slabs
+;  Huge = /huge
 
 [Server]
   Slab = localhost

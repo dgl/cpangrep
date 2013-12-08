@@ -1,14 +1,19 @@
 #!/usr/bin/env perl
 use strict;
 use 5.010;
+use FindBin;
+use lib "$FindBin::RealBin/../lib";
+
+use AnyEvent::Redis;
+use Config::GitLike;
+use EV;
+use File::Basename qw(basename);
+use IO::AIO qw(mmap aio_readahead);
+use JSON;
 use POSIX ();
 use Time::HiRes qw(time);
-use EV;
-use AnyEvent::Redis;
-use IO::AIO qw(mmap aio_readahead);
 use re::engine::RE2;
-use JSON;
-use Config::GitLike;
+
 use WWW::CPANGrep::Slab::Common;
 
 my $config = Config::GitLike->new(confname => "cpangrep")->load_file("etc/config");
@@ -33,10 +38,38 @@ my $redis = AnyEvent::Redis->new;
 
 sub open_cached {
   my($file) = @_;
-  state %cache;
+  state(%cache, %cache_size);
+
+  if($config->{"location.huge"}) {
+    my $huge = $config->{"location.huge"} . "/" . basename($file);
+    open my $orig_fh, "<", $file or die $!;
+    eval {
+      if(!-f $huge) {
+        print "Create $huge\n";
+        # racy, but everyone wins.
+        open my $fh, "+>", $huge or die $!;
+        mmap my $pm, -s $orig_fh, IO::AIO::PROT_READ|IO::AIO::PROT_WRITE,
+          IO::AIO::MAP_SHARED, $fh or die $!;
+        local $/;
+        substr($pm, 0, -s $orig_fh, <$orig_fh>);
+        close $fh or die $!;
+      }
+      die "Huge file not large enough" if -s $huge < -s $orig_fh;
+      $file = $huge;
+      $cache_size{$file} = -s $orig_fh;
+    } or do {
+      print "Failed to use hugetlbfs for $huge: $@\n";
+      $cache_size{$file} = -s $file;
+    };
+  } else {
+    $cache_size{$file} = -s $file;
+  }
 
   open $cache{$file}, "<", $file or die "$file: $!" unless $cache{$file};
-  return $cache{$file};
+  mmap my $pm, $cache_size{$file}, IO::AIO::PROT_READ, IO::AIO::MAP_SHARED, $cache{$file} or die $!;
+  IO::AIO::madvise $pm, 0, $cache_size{$file},
+    IO::AIO::MADV_WILLNEED | IO::AIO::MADV_SEQUENTIAL;
+  return $pm;
 }
 
 sub do_match {
@@ -47,17 +80,13 @@ sub do_match {
   $re = qr/$re/m;
 
   my $i = 0;
-  my $fh_next = open_cached($dir . "/" . $process->[$i++]);
+  my $pm_next = open_cached($dir . "/" . $process->[$i++]);
 
   for my $file(@$process) {
-    my $fh = $fh_next;
-    mmap my $pm, -s $fh, IO::AIO::PROT_READ, IO::AIO::MAP_SHARED, $fh or die $!;
+    my $pm = $pm_next;
 
     if(my $next = $process->[$i++]) {
-      $fh_next = open_cached($dir . "/" . $next);
-      # On machines with spare IO bandwidth this seemed to help, however I'm now
-      # running on VMs and this seems less of a help.
-      #aio_readahead $fh_next, 0, -s $next;
+      $pm_next = open_cached($dir . "/" . $next);
     }
 
     my @results;
