@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CPAN Grep</title>
+<link rel="stylesheet" href="http://s.cpan.me/cpangrep.css">
+</head>
+<body>
+<img src="http://s.cpan.me/logo.png" align="center">
+<h1>Unable to connect to backend</h1>
+<p>
+It is likely reindexing is in progress. If it's down for too long bother dg on IRC.
+</p>
+</body>
+</html>
