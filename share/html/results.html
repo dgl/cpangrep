@@ -10,7 +10,6 @@
 	<meta name="robots" content="all" />
 	<link rel="icon" type="image/png" href="/favicon.png" />
 	<link rel="stylesheet" type="text/css" media="screen, projection" href="//s.cpan.me/cpangrep.css" />
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
@@ -25,12 +24,15 @@
 
 </script>
         <script>
-          $(document).ready(function() {
-            $(document).bind("keypress", function(e) {
-              if(e.srcElement == $(".q")[0]) return;
+          document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('keypress', function (e) {
+              var search_box = document.getElementsByName("q")[0];
+              if (e.srcElement == search_box)
+                return;
 
-              switch(String.fromCharCode(e.charCode)) {
-                case '/': $(".q").focus(); e.preventDefault(); break;
+              if (String.fromCharCode(e.charCode) == '/') {
+                search_box.focus();
+                e.preventDefault();
               }
             });
           });
