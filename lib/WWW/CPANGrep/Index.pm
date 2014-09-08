@@ -75,7 +75,18 @@ sub index {
     my $redis_conn = (tied %{$self->redis})->{_conn};
     eval { $redis_conn->rename("cpangrep:slabs", "cpangrep:slabs-old") };
     $redis_conn->rename("new-index", "cpangrep:slabs");
-    $redis_conn->save;
+    eval {
+      $redis_conn->save;
+      1;
+    } or do {
+      my $err = $@;
+      if($err !~ /Background save is already in progress/) {
+        die $err;
+      }
+      warn $err;
+      sleep 5;
+      $redis_conn->save;
+    };
 
     for my $slab(@{$self->redis->{"cpangrep:slabs-old"}}) {
       unlink $self->slab_dir . "/" . $slab;
