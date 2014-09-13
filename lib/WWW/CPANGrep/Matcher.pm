@@ -94,7 +94,10 @@ sub open_cached {
   my($file) = @_;
   state %cache;
 
-  open $cache{$file}, "<", $file or die "$file: $!" unless $cache{$file};
+  open $cache{$file}, "<", $file or do {
+    %cache = ();
+    open $cache{$file}, "<", $file or die "$file: $!";
+  } unless $cache{$file};
   return $cache{$file};
 }
 
