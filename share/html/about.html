@@ -50,7 +50,7 @@
                   <li><code>author:</code> Search CPAN author ID.</li>
                 </ul>
 
-                <p>A useful shortcut for these operators is to use '=' rather than ':' as a separator, this does a full string match (i.e. wraps anchors around the supplied regexp).</p>
+                <p>A useful shortcut for these operators is to use '=' rather than ':' as a separator, this does a full string match (i.e. wraps anchors around the supplied regexp so <tt>file:^Makefile\.PL$</tt> is the same as <tt>file=Makefile\.PL</tt>).</p>
 
                 <p>For example <code>-dist=perl</code> to exclude perl, <code>file:.xs</code> to search only XS files or <code>-file:"ppport\.h"</code> to exclude ppport.h.</p>
 
@@ -72,6 +72,19 @@
                 <h2>API</h2>
 
                 <p>There is an experimental API (i.e. subject to change), using the same syntax as the normal searches at: <code>http://grep.cpan.me/api?q=</code>. For example: <a href="/api?q=-dist=perl+GvCV">http://grep.cpan.me/api?q=-dist=perl+GvCV</a>. If you expect to make heavy usage of this please ensure you send a User-Agent header that describes your application (ideally with contact details) and send a mail to the mailing list so we can keep track of users.</p>
+
+                <h3>Command line client</h3>
+
+                <p>
+                There is a command line client on CPAN: <a href="http://cpan.me/App::cpangrep">App::cpangrep</a>.
+                </p>
+
+                <p>
+                  This is particularly useful for scripting, e.g. to find the intersection of distributions where the file dist.ini contains "[Prereq" and "@Author:ETHER" you can use:
+                  <code>
+                    comm -12 &lt;(cpangrep -l file=dist.ini \\\[Prereq | sort) &lt;(cpangrep -l file=dist.ini @Author::ETHER | sort)
+                  </code>
+                </p>
 
 		<h2>Misc</h2>
                 <p>Written by <a href="https://dgl.cx">David Leadbeater</a>. For help <a href="https://groups.google.com/forum/#!forum/cpangrep">use the cpangrep mailing list</a> or ask me (dg) on irc.perl.org, #toolchain.</p>
