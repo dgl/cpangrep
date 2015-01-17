@@ -1,0 +1,24 @@
+#!/bin/sh
+CPAN=/srv/CPAN
+CPANGREP=$HOME/cpangrep
+CPANINDEX=/srv/CPAN-index
+
+# Bring it all down:
+killall starman
+pkill -f cpangrep-matcher
+screen -S cpangrep -X quit
+
+sleep 2
+
+rm -rf $CPANINDEX/*
+echo flushall | redis-cli
+
+cd $CPANGREP
+bin/cpangrep-index --cpan_dir $CPAN --slab_dir $CPANINDEX
+
+# Wait a bit for indexing processes to finish
+sleep 30
+
+# Run it all in screen again:
+screen -dmS cpangrep starman -Ilib lib/WWW/CPANGrep.pm
+screen -S cpangrep -X screen -t matcher bin/cpangrep-matcher
