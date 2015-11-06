@@ -173,7 +173,7 @@ sub render_response {
 
             $_ = $_->select('.file-link')->replace_content($filename)
               ->then
-              ->set_attribute(href => "$source#L1");
+              ->set_attribute(href => "$source");
 
             if($file->{truncated}) {
               $_ = $_->select('.file-number')
