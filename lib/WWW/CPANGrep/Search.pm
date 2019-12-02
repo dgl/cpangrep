@@ -229,7 +229,7 @@ sub _find_slabs {
 
   my $slabs = set(@$all_slabs);
 
-  for my $option(values $self->_options) {
+  for my $option(values @{$self->_options}) {
     if(!$option->{negate}) {
       if($option->{type} eq 'dist') {
 
@@ -238,7 +238,7 @@ sub _find_slabs {
         $dist_slab_map ||= { @{$redis->hgetall("cpangrep:dists")->recv} };
 
         $slabs = set(map $dist_slab_map->{$_}, grep $_ =~ $option->{re}, keys
-          $dist_slab_map)->intersection($slabs);
+          %$dist_slab_map)->intersection($slabs);
       }
     }
   }
@@ -302,7 +302,7 @@ sub filter_results {
         @file_results = @file_results[0 .. 2];
       }
 
-      push $ordered[-1]->{files}, {
+      push @{$ordered[-1]->{files}}, {
         file => $file,
         results => \@file_results,
         truncated => $truncated,
